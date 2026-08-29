@@ -8,7 +8,7 @@ import {
     Settings, LogOut, Menu, X, PlusCircle, History, Bookmark, FileText
 } from "lucide-react";
 
-const USER_ROLE = "admin";
+const USER_ROLE = "user";
 
 const menuItems = {
     user: [
@@ -18,7 +18,7 @@ const menuItems = {
         { name: "Wishlist", icon: Bookmark, path: "/dashboard/user/wishlist" },
     ],
     writer: [
-        { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard/writer" },
+        { name: "Author's Desk", icon: LayoutDashboard, path: "/dashboard/writer" },
         { name: "Manage Ebooks", icon: FileText, path: "/dashboard/writer/manage-ebooks" },
         { name: "Add Ebook", icon: PlusCircle, path: "/dashboard/writer/add-ebook" },
         { name: "Sales History", icon: CircleDollarSign, path: "/dashboard/writer/sales-history" },
@@ -54,9 +54,8 @@ export default function DashboardLayout({ children }) {
     }, []);
 
     return (
-        // Fix 2: পুরো ড্যাশবোর্ডকে max-w-[1600px] এবং mx-auto তে রাখা হয়েছে, যাতে জুম আউট করলে সাইডবার ও কন্টেন্ট একসাথে থাকে।
         <div className="max-w-[1600px] mx-auto flex w-full font-sans text-amber-950 bg-[#FDFBF7] min-h-[calc(100vh-80px)]">
-            
+
             {/* Mobile Overlay */}
             <AnimatePresence>
                 {isMobile && isSidebarOpen && (
@@ -72,10 +71,10 @@ export default function DashboardLayout({ children }) {
             <motion.aside
                 initial={false}
                 animate={{ width: isSidebarOpen ? "260px" : "0px", x: isSidebarOpen ? 0 : isMobile ? -260 : 0 }}
-                // Fix 1: top-0 এর বদলে lg:top-20 (নেভবারের উচ্চতা) দেওয়া হয়েছে, যাতে স্ক্রল করলে নেভবারের নিচেই থাকে।
+
                 className="fixed lg:sticky top-0 lg:top-20 h-screen lg:h-[calc(100vh-80px)] bg-white border-r border-amber-900/10 z-40 overflow-hidden flex flex-col shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
             >
-                {/* Fix 3: ডাবল লোগো এড়াতে সাইডবার থেকে লোগো বাদ দিয়ে শুধু মোবাইলের জন্য ক্লোজ বাটন রাখা হয়েছে */}
+
                 {isMobile && (
                     <div className="p-4 flex items-center justify-end lg:hidden">
                         <button onClick={() => setIsSidebarOpen(false)} className="text-amber-900/60 hover:text-amber-900 bg-amber-50 p-2 rounded-lg">
@@ -124,8 +123,7 @@ export default function DashboardLayout({ children }) {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 bg-[#FDFBF7]">
-                
-                {/* Fix 3: ডেস্কটপে অতিরিক্ত হেডার হাইড করে দেওয়া হয়েছে (lg:hidden), শুধু মোবাইলে মেনু ওপেন করার জন্য দেখাবে */}
+
                 <div className="lg:hidden h-16 bg-white/80 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-6 flex items-center gap-4">
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
