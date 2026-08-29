@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FaFacebookF, FaTwitter, FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 const Footer = () => {
     return (
@@ -46,7 +47,7 @@ const Footer = () => {
                         <h3 className="font-semibold text-amber-600 mb-5 tracking-widest uppercase text-xs">Connect</h3>
                         <div className="flex flex-wrap gap-3">
                             <a 
-                                href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook"
+                                href="https://facebook.com/naym4islam" target="_blank" rel="noreferrer" aria-label="Facebook"
                                 className="w-10 h-10 rounded-full bg-stone-800 text-stone-300 flex items-center justify-center hover:bg-amber-700 hover:text-white hover:-translate-y-1 transition-all duration-300"
                             >
                                 <FaFacebookF size={16} />
@@ -55,16 +56,16 @@ const Footer = () => {
                                 href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter"
                                 className="w-10 h-10 rounded-full bg-stone-800 text-stone-300 flex items-center justify-center hover:bg-amber-700 hover:text-white hover:-translate-y-1 transition-all duration-300"
                             >
-                                <FaTwitter size={16} />
+                                <FaXTwitter size={16} />
                             </a>
                             <a 
-                                href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"
+                                href="https://github.com/nymulislam" target="_blank" rel="noreferrer" aria-label="GitHub"
                                 className="w-10 h-10 rounded-full bg-stone-800 text-stone-300 flex items-center justify-center hover:bg-amber-700 hover:text-white hover:-translate-y-1 transition-all duration-300"
                             >
                                 <FaGithub size={18} />
                             </a>
                             <a 
-                                href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"
+                                href="https://linkedin.com/in/nymulislam" target="_blank" rel="noreferrer" aria-label="LinkedIn"
                                 className="w-10 h-10 rounded-full bg-stone-800 text-stone-300 flex items-center justify-center hover:bg-amber-700 hover:text-white hover:-translate-y-1 transition-all duration-300"
                             >
                                 <FaLinkedinIn size={16} />
