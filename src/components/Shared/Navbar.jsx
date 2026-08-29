@@ -1,12 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FiMenu, FiHome, FiBookOpen, FiLayout, FiUserPlus, FiLogIn } from "react-icons/fi";
+import { usePathname, useRouter } from "next/navigation";
+import { FiMenu, FiHome, FiBookOpen, FiLayout, FiLogIn } from "react-icons/fi";
+import { authClient } from "@/app/lib/auth-client";
 
 const Navbar = () => {
     const pathname = usePathname();
-    const user = null; // টেস্টিংয়ের জন্য null রাখা হয়েছে
+    const router = useRouter();
+    
+    // Better-Auth real time session hook
+    const { data: session, isPending } = authClient.useSession();
+    const user = session?.user;
+
+    const handleLogout = async () => {
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    router.push("/login");
+                },
+            },
+        });
+    };
 
     const navLinks = [
         { name: "Home", path: "/", icon: <FiHome /> },
@@ -72,12 +87,22 @@ const Navbar = () => {
                     </ul>
                 </div>
 
-                {/* Auth Buttons (Login & Register / Logout) */}
+                {/* Auth Buttons */}
                 <div className="navbar-end">
-                    {user ? (
-                        <button className="btn btn-outline border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400 btn-sm lg:btn-md rounded-full px-6">
-                            Logout
-                        </button>
+                    {isPending ? (
+                        <div className="w-20 h-8 bg-amber-950/10 animate-pulse rounded-full" />
+                    ) : user ? (
+                        <div className="flex items-center gap-3">
+                            <span className="hidden xl:inline-block text-xs font-semibold text-amber-900/70">
+                                Hi, {user.name || "Scholar"}
+                            </span>
+                            <button 
+                                onClick={handleLogout}
+                                className="btn btn-outline border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400 btn-sm lg:btn-md rounded-full px-6 cursor-pointer"
+                            >
+                                Logout
+                            </button>
+                        </div>
                     ) : (
                         <div className="flex items-center gap-3">
                             {/* Sign In Link */}
