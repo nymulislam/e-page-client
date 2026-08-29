@@ -1,14 +1,20 @@
+import FeaturedEbooks from "@/components/Home/FeaturedEbooks";
+import Genres from "@/components/Home/Genres";
 import Hero from "@/components/Home/Hero";
+import Newsletter from "@/components/Home/NewsLetter";
+import TopWriters from "@/components/Home/TopWriters";
 import Footer from "@/components/Shared/Footer";
 import Navbar from "@/components/Shared/Navbar";
-import Image from "next/image";
+
 
 export default function Home() {
   return (
-    <div>
-      <Navbar />
+    <main className="bg-[#FDFBF7] min-h-screen">
       <Hero />
-      <Footer />
-    </div>
+      <FeaturedEbooks />
+      <TopWriters />
+      <Genres />
+      <Newsletter />
+    </main>
   );
 }
