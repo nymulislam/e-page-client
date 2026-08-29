@@ -26,7 +26,7 @@ const Navbar = () => {
     const navLinks = [
         { name: "Home", path: "/", icon: <FiHome /> },
         { name: "Browse Ebooks", path: "/ebooks", icon: <FiBookOpen /> },
-        { name: "Dashboard", path: "/dashboard", icon: <FiLayout /> },
+        { name: "Dashboard", path: "/dashboard/admin", icon: <FiLayout /> },
     ];
 
     const renderDesktopLinks = navLinks.map((link) => (

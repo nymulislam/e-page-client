@@ -1,61 +1,97 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, SlidersHorizontal, BookOpen, ShoppingBag, CheckCircle2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import {
+    Search, SlidersHorizontal, BookOpen, ShoppingBag,
+    CheckCircle2, ChevronLeft, ChevronRight, MoreHorizontal
+} from "lucide-react";
 
-// ডামি ইবুক ডাটা (আপনার ডাটাবেজ বা API থেকে এটি ফেচ হবে)
-const MOCK_EBOOKS = [
-    {
-        id: "1",
-        title: "The Architecture of Modern Web Apps",
-        writer: "Naimul Islam",
-        price: "$24.00",
-        cover: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop",
-        isSold: true,
-    },
-    {
-        id: "2",
-        title: "Timeless Poetry & Philosophical Essays",
-        writer: "Sabrina Ahmed",
-        price: "$15.50",
-        cover: "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop",
-        isSold: false,
-    },
-    {
-        id: "3",
-        title: "Mastering React & Next.js Ecosystem",
-        writer: "Tanvir Hossain",
-        price: "$29.99",
-        cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop",
-        isSold: false,
-    },
-    {
-        id: "4",
-        title: "Digital Manuscript Archives of Bengal",
-        writer: "Dr. Farhana Rahman",
-        price: "$19.00",
-        cover: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop",
-        isSold: true,
-    },
-];
+// আলাদা কম্পোনেন্ট তৈরি করা হয়েছে যাতে useSearchParams safely Suspense-এর ভিতরে কাজ করে
+function BrowseEbooksContent() {
+    const searchParams = useSearchParams();
+    const queryCategory = searchParams.get("category");
 
-export default function BrowseEbooksPage() {
+    const [allEbooks, setAllEbooks] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
-    const [isLoading, setIsLoading] = useState(false); // ডাটা লোডিংয়ের সময় true হবে
+    const [isLoading, setIsLoading] = useState(true);
 
-    // ফিল্টারিং লজিক
-    const filteredEbooks = MOCK_EBOOKS.filter((ebook) => {
-        const matchesSearch = ebook.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              ebook.writer.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesSearch;
+    // Premium Pagination States
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
+
+    // API থেকে ডেটা ফেচিং
+    useEffect(() => {
+        const fetchAllEbooks = async () => {
+            setIsLoading(true);
+            try {
+                const res = await fetch("http://localhost:5000/ebooks");
+                const data = await res.json();
+                setAllEbooks(data);
+            } catch (error) {
+                console.error("Error fetching all ebooks:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchAllEbooks();
+    }, []);
+
+    // URL Query Parameter
+    useEffect(() => {
+        if (queryCategory) {
+            const formattedCategory = queryCategory.charAt(0).toUpperCase() + queryCategory.slice(1);
+            setSelectedCategory(formattedCategory);
+        }
+    }, [queryCategory]);
+
+    // ক্যাটাগরি বা সার্চ চেঞ্জ হলে পেইজ ১ এ রিসেট হবে
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedCategory]);
+
+    const categories = ["All", "Technology", "Literature", "History", "Science", "Poetry", "Islamic", "Mystery"];
+
+    const filteredEbooks = allEbooks.filter((ebook) => {
+        const matchesSearch = ebook.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ebook.writer?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const ebookGenre = ebook.genre || ebook.category || "";
+        const matchesCategory = selectedCategory === "All" ||
+            ebookGenre.toLowerCase() === selectedCategory.toLowerCase();
+
+        return matchesSearch && matchesCategory;
     });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredEbooks.length / itemsPerPage);
+    const paginatedEbooks = filteredEbooks.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Smart Page Number Generator (for ellipsis)
+    const getPageNumbers = () => {
+        const pages = [];
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 3) {
+                pages.push(1, 2, 3, 4, '...', totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            }
+        }
+        return pages;
+    };
 
     return (
         <div className="min-h-screen bg-[#FDFBF7] text-amber-950 px-4 md:px-12 py-10">
-            
             {/* Page Header */}
             <div className="max-w-7xl mx-auto mb-12 text-center">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100/60 border border-amber-200 text-amber-900 text-xs font-semibold uppercase tracking-wider mb-4">
@@ -71,8 +107,6 @@ export default function BrowseEbooksPage() {
 
             {/* Search and Filter Bar */}
             <div className="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row gap-4 items-center justify-between">
-                
-                {/* Search Input */}
                 <div className="relative w-full md:w-96">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-900/40" size={18} />
                     <input
@@ -84,17 +118,15 @@ export default function BrowseEbooksPage() {
                     />
                 </div>
 
-                {/* Filter / Category Pills */}
-                <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-                    {["All", "Technology", "Literature", "History", "Science"].map((cat) => (
+                <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 hide-scrollbar">
+                    {categories.map((cat) => (
                         <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                                selectedCategory === cat
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === cat
                                     ? "bg-amber-950 text-amber-50 shadow-md"
                                     : "bg-white border border-amber-200 text-amber-900/70 hover:bg-amber-50"
-                            }`}
+                                }`}
                         >
                             {cat}
                         </button>
@@ -105,64 +137,100 @@ export default function BrowseEbooksPage() {
             {/* Main Content Area */}
             <div className="max-w-7xl mx-auto">
                 {isLoading ? (
-                    /* Skeleton Loader Grid */
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-                            <div key={item} className="bg-white rounded-2xl p-4 border border-amber-100 shadow-sm animate-pulse h-80 flex flex-col justify-between">
+                        {[...Array(8)].map((_, idx) => (
+                            <div key={idx} className="bg-white rounded-2xl p-4 border border-amber-100 shadow-sm animate-pulse h-80 flex flex-col justify-between">
                                 <div className="w-full h-48 bg-amber-100/50 rounded-xl mb-4"></div>
                                 <div className="h-4 bg-amber-100/70 rounded w-3/4 mb-2"></div>
                                 <div className="h-3 bg-amber-100/50 rounded w-1/2"></div>
                             </div>
                         ))}
                     </div>
-                ) : filteredEbooks.length > 0 ? (
-                    /* Responsive Grid: 2 cols (mobile), 3 cols (tablet), 4 cols (desktop) */
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {filteredEbooks.map((ebook) => (
-                            <Link
-                                key={ebook.id}
-                                href={`/ebooks/${ebook.id}`}
-                                className="group bg-white rounded-2xl p-4 border border-amber-200/80 shadow-sm hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
-                            >
-                                {/* Sold Badge */}
-                                {ebook.isSold && (
-                                    <div className="absolute top-6 right-6 z-10 bg-amber-950/90 text-amber-200 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-md">
-                                        <CheckCircle2 size={13} className="text-amber-400" /> Sold
+                ) : paginatedEbooks.length > 0 ? (
+                    <>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
+                            {paginatedEbooks.map((ebook) => (
+                                <Link
+                                    key={ebook.id || ebook._id}
+                                    href={`/ebooks/${ebook.id || ebook._id}`}
+                                    className="group bg-white rounded-2xl p-4 border border-amber-200/80 shadow-sm hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+                                >
+                                    {ebook.isSold && (
+                                        <div className="absolute top-6 right-6 z-10 bg-amber-950/90 text-amber-200 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                                            <CheckCircle2 size={13} className="text-amber-400" /> Sold
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <div className="relative w-full h-52 md:h-60 rounded-xl overflow-hidden mb-4 bg-amber-50 border border-amber-100">
+                                            <Image
+                                                src={ebook.cover}
+                                                alt={ebook.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        </div>
+                                        <h3 className="font-serif font-bold text-amber-950 text-base md:text-lg line-clamp-1 group-hover:text-amber-700 transition-colors">
+                                            {ebook.title}
+                                        </h3>
+                                        <p className="text-xs md:text-sm text-amber-900/60 mt-1">
+                                            By <span className="font-medium text-amber-900">{ebook.writer}</span>
+                                        </p>
                                     </div>
-                                )}
 
-                                <div>
-                                    {/* Cover Image Thumbnail */}
-                                    <div className="relative w-full h-52 md:h-60 rounded-xl overflow-hidden mb-4 bg-amber-50 border border-amber-100">
-                                        <Image
-                                            src={ebook.cover}
-                                            alt={ebook.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
+                                    <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
+                                        <span className="font-bold text-amber-950 text-base md:text-lg">
+                                            {typeof ebook.price === 'number' ? `$${ebook.price.toFixed(2)}` : ebook.price}
+                                        </span>
+                                        <span className="w-9 h-9 rounded-xl bg-amber-50 group-hover:bg-amber-950 group-hover:text-amber-50 text-amber-900 flex items-center justify-center transition-all shadow-sm">
+                                            <ShoppingBag size={16} />
+                                        </span>
                                     </div>
+                                </Link>
+                            ))}
+                        </div>
 
-                                    {/* Title & Writer */}
-                                    <h3 className="font-serif font-bold text-amber-950 text-base md:text-lg line-clamp-1 group-hover:text-amber-700 transition-colors">
-                                        {ebook.title}
-                                    </h3>
-                                    <p className="text-xs md:text-sm text-amber-900/60 mt-1">
-                                        By <span className="font-medium text-amber-900">{ebook.writer}</span>
-                                    </p>
-                                </div>
+                        {/* Premium Pagination System */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-2 mt-8">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-xl bg-white border border-amber-200 text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 transition-colors"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
 
-                                {/* Price & Action Footer */}
-                                <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
-                                    <span className="font-bold text-amber-950 text-base md:text-lg">{ebook.price}</span>
-                                    <span className="w-9 h-9 rounded-xl bg-amber-50 group-hover:bg-amber-950 group-hover:text-amber-50 text-amber-900 flex items-center justify-center transition-all shadow-sm">
-                                        <ShoppingBag size={16} />
-                                    </span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                                {getPageNumbers().map((pageNum, idx) => (
+                                    pageNum === '...' ? (
+                                        <span key={`ellipsis-${idx}`} className="px-2 text-amber-900/40">
+                                            <MoreHorizontal size={20} />
+                                        </span>
+                                    ) : (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`w-10 h-10 rounded-xl font-medium transition-all ${currentPage === pageNum
+                                                    ? "bg-amber-950 text-amber-50 shadow-md"
+                                                    : "bg-white border border-amber-200 text-amber-900 hover:bg-amber-50"
+                                                }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    )
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-xl bg-white border border-amber-200 text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-amber-50 transition-colors"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </div>
+                        )}
+                    </>
                 ) : (
-                    /* Friendly Message When No Ebooks Match Filters */
                     <div className="text-center py-20 bg-white rounded-3xl border border-amber-200 shadow-sm max-w-xl mx-auto p-8">
                         <div className="w-16 h-16 bg-amber-50 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100">
                             <SlidersHorizontal size={24} />
@@ -181,5 +249,18 @@ export default function BrowseEbooksPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+// Suspense Boundary Required for Next.js App Router when using useSearchParams
+export default function BrowseEbooksPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex justify-center items-center bg-[#FDFBF7]">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-900"></div>
+            </div>
+        }>
+            <BrowseEbooksContent />
+        </Suspense>
     );
 }
