@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiMenu, FiHome, FiBookOpen, FiLayout } from "react-icons/fi";
+import { FiMenu, FiHome, FiBookOpen, FiLayout, FiUserPlus, FiLogIn } from "react-icons/fi";
 
 const Navbar = () => {
     const pathname = usePathname();
-    const user = null; 
+    const user = null; // টেস্টিংয়ের জন্য null রাখা হয়েছে
 
     const navLinks = [
         { name: "Home", path: "/", icon: <FiHome /> },
@@ -72,16 +72,31 @@ const Navbar = () => {
                     </ul>
                 </div>
 
-                {/* Auth Button */}
+                {/* Auth Buttons (Login & Register / Logout) */}
                 <div className="navbar-end">
                     {user ? (
                         <button className="btn btn-outline border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400 btn-sm lg:btn-md rounded-full px-6">
                             Logout
                         </button>
                     ) : (
-                        <Link href="/login" className="btn bg-amber-900 hover:bg-amber-950 text-amber-50 border-none btn-sm lg:btn-md shadow-md rounded-full px-8 transition-transform hover:scale-105">
-                            Login
-                        </Link>
+                        <div className="flex items-center gap-3">
+                            {/* Sign In Link */}
+                            <Link 
+                                href="/login" 
+                                className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-amber-950 hover:text-amber-700 transition-colors px-3 py-2"
+                            >
+                                <FiLogIn size={16} className="text-amber-700" />
+                                Sign In
+                            </Link>
+
+                            {/* Get Started / Register Button */}
+                            <Link 
+                                href="/register" 
+                                className="btn bg-amber-950 hover:bg-amber-900 text-amber-50 border-none btn-sm lg:btn-md shadow-md rounded-full px-6 transition-all hover:scale-105"
+                            >
+                                Get Started
+                            </Link>
+                        </div>
                     )}
                 </div>
             </div>
