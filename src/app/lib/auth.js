@@ -24,12 +24,30 @@ export const auth = betterAuth({
 
     user: {
         additionalFields: {
-            userType: {
-                defaultValue: "reader"
+            requestedRole: {
+                required: false,
+                input: true, // Allows client to send it
             },
             plan: {
-                defaultValue: "free"
+                default: "free"
             }
+        },
+    },
+
+    // HOOKS: Safe server-side processing that bypasses client restrictions
+    databaseHooks: {
+        user: {
+            create: {
+                before: async (user) => {
+                    const finalRole = user.requestedRole || "reader";
+                    return {
+                        data: {
+                            ...user,
+                            role: finalRole, // Automatically assigns 'reader' to new users safely
+                        },
+                    };
+                },
+            },
         },
     },
 

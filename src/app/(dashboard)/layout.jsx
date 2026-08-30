@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }) {
 
     const { data: session, isPending } = authClient.useSession();
 
-    const userRole = session?.user?.userType || "reader";
+    const userRole = session?.user?.role || "reader";
     const currentMenu = menuItems[userRole] || menuItems.reader;
 
     useEffect(() => {

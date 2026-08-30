@@ -22,7 +22,7 @@ const Navbar = () => {
         });
     };
 
-    const role = user?.userType || "reader"; 
+    const role = user?.role || "reader"; 
     const dashboardPath = `/dashboard/${role}`;
 
     const navLinks = [

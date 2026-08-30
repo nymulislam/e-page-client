@@ -39,7 +39,7 @@ export default function LoginPage() {
             }
 
             const session = await authClient.getSession();
-            const userRole = session?.data?.user?.userType
+            const userRole = session?.data?.user?.role
  || "reader";
 
             if (userRole === "admin") router.push("/dashboard/admin");

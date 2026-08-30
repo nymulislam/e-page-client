@@ -31,12 +31,11 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            // Send 'userType' instead of 'role' to avoid Better-Auth restrictions
             const { data, error } = await authClient.signUp.email({
                 email,
                 password,
                 name,
-                userType: selectedRole, // "reader" or "writer"
+                requestedRole: selectedRole, // "reader" or "writer"
                 plan: "free",
                 callbackURL: "/",
             });
