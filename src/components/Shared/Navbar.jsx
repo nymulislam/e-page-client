@@ -22,17 +22,14 @@ const Navbar = () => {
         });
     };
 
-    // ইউজারের রোল অনুযায়ী ড্যাশবোর্ডের পাথ নির্ধারণ (ডিফল্ট: user)
-    const role = user?.role || "user"; 
+    const role = user?.userType || "writer"; 
     const dashboardPath = `/dashboard/${role}`;
 
-    // বেসিক ন্যাভিগেশন লিংক
     const navLinks = [
         { name: "Home", path: "/", icon: <FiHome /> },
         { name: "Browse Ebooks", path: "/ebooks", icon: <FiBookOpen /> },
     ];
 
-    // ইউজার লগইন থাকলে ড্যাশবোর্ড লিংক যুক্ত হবে
     if (user) {
         navLinks.push({ name: "Dashboard", path: dashboardPath, icon: <FiLayout /> });
     }

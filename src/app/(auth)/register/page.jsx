@@ -36,7 +36,8 @@ export default function RegisterPage() {
                 email,
                 password,
                 name,
-                userType: selectedRole, // "Reader" or "Writer"
+                userType: selectedRole, // "reader" or "writer"
+                plan: "free",
                 callbackURL: "/",
             });
 
@@ -150,15 +151,15 @@ export default function RegisterPage() {
                         <label className="text-sm font-semibold text-amber-950/80 block mb-2">Choose your journey:</label>
                         <div className="grid grid-cols-2 gap-4">
                             <div
-                                onClick={() => setSelectedRole("Reader")}
-                                className={`cursor-pointer border rounded-xl p-3 flex flex-col items-center gap-1.5 transition-all ${selectedRole === "Reader" ? "bg-amber-50 border-amber-600 text-amber-900 shadow-sm" : "bg-white border-amber-200 text-amber-900/60 hover:border-amber-400"}`}
+                                onClick={() => setSelectedRole("reader")}
+                                className={`cursor-pointer border rounded-xl p-3 flex flex-col items-center gap-1.5 transition-all ${selectedRole === "reader" ? "bg-amber-50 border-amber-600 text-amber-900 shadow-sm" : "bg-white border-amber-200 text-amber-900/60 hover:border-amber-400"}`}
                             >
                                 <BookOpen size={20} />
                                 <span className="text-sm font-medium">Reader</span>
                             </div>
                             <div
-                                onClick={() => setSelectedRole("Writer")}
-                                className={`cursor-pointer border rounded-xl p-3 flex flex-col items-center gap-1.5 transition-all ${selectedRole === "Writer" ? "bg-amber-50 border-amber-600 text-amber-900 shadow-sm" : "bg-white border-amber-200 text-amber-900/60 hover:border-amber-400"}`}
+                                onClick={() => setSelectedRole("writer")}
+                                className={`cursor-pointer border rounded-xl p-3 flex flex-col items-center gap-1.5 transition-all ${selectedRole === "writer" ? "bg-amber-50 border-amber-600 text-amber-900 shadow-sm" : "bg-white border-amber-200 text-amber-900/60 hover:border-amber-400"}`}
                             >
                                 <PenTool size={20} />
                                 <span className="text-sm font-medium">Writer</span>

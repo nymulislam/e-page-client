@@ -1,17 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard, BookOpen, Users, CircleDollarSign,
     Settings, LogOut, Menu, X, PlusCircle, History, Bookmark, FileText
 } from "lucide-react";
-
-const USER_ROLE = "user";
+import { authClient } from "@/app/lib/auth-client";
 
 const menuItems = {
-    user: [
+    reader: [
         { name: "My Profile", icon: Settings, path: "/dashboard/user" },
         { name: "Purchased Ebooks", icon: BookOpen, path: "/dashboard/user/my-ebooks" },
         { name: "Purchase History", icon: History, path: "/dashboard/user/purchase-history" },
@@ -36,7 +35,12 @@ export default function DashboardLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const pathname = usePathname();
-    const currentMenu = menuItems[USER_ROLE] || [];
+    const router = useRouter();
+
+    const { data: session, isPending } = authClient.useSession();
+
+    const userRole = session?.user?.userType || "reader";
+    const currentMenu = menuItems[userRole] || menuItems.reader;
 
     useEffect(() => {
         const handleResize = () => {
@@ -52,6 +56,25 @@ export default function DashboardLayout({ children }) {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    const handleLogout = async () => {
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    router.push("/login");
+                },
+            },
+        });
+    };
+
+
+    if (isPending) {
+        return (
+            <div className="min-h-screen flex justify-center items-center bg-[#FDFBF7]">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-900"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-[1600px] mx-auto flex w-full font-sans text-amber-950 bg-[#FDFBF7] min-h-[calc(100vh-80px)]">
@@ -71,10 +94,8 @@ export default function DashboardLayout({ children }) {
             <motion.aside
                 initial={false}
                 animate={{ width: isSidebarOpen ? "260px" : "0px", x: isSidebarOpen ? 0 : isMobile ? -260 : 0 }}
-
                 className="fixed lg:sticky top-0 lg:top-20 h-screen lg:h-[calc(100vh-80px)] bg-white border-r border-amber-900/10 z-40 overflow-hidden flex flex-col shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
             >
-
                 {isMobile && (
                     <div className="p-4 flex items-center justify-end lg:hidden">
                         <button onClick={() => setIsSidebarOpen(false)} className="text-amber-900/60 hover:text-amber-900 bg-amber-50 p-2 rounded-lg">
@@ -86,10 +107,10 @@ export default function DashboardLayout({ children }) {
                 <div className={`px-5 ${isMobile ? 'pt-0' : 'pt-6'} pb-4`}>
                     <div className="bg-amber-50/80 rounded-xl p-4 border border-amber-100 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-amber-900 font-bold uppercase shadow-sm">
-                            {USER_ROLE[0]}
+                            {userRole[0]}
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-amber-950 capitalize">{USER_ROLE}</p>
+                            <p className="text-sm font-semibold text-amber-950 capitalize">{userRole}</p>
                             <p className="text-xs text-amber-900/60">Manage your space</p>
                         </div>
                     </div>
@@ -114,7 +135,10 @@ export default function DashboardLayout({ children }) {
                 </nav>
 
                 <div className="p-4 mt-auto border-t border-amber-900/10">
-                    <button className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-600/80 hover:bg-red-50 hover:text-red-600 transition-colors">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-600/80 hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
                         <LogOut size={18} strokeWidth={2} />
                         <span className="text-sm font-medium">Logout</span>
                     </button>
@@ -123,7 +147,6 @@ export default function DashboardLayout({ children }) {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 bg-[#FDFBF7]">
-
                 <div className="lg:hidden h-16 bg-white/80 backdrop-blur-md border-b border-amber-900/10 sticky top-0 z-30 px-6 flex items-center gap-4">
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}

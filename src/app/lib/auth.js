@@ -13,15 +13,6 @@ export const auth = betterAuth({
 
     emailAndPassword: {
         enabled: true,
-        customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
-            ...coreFields,
-            role: additionalFields?.role || "user",
-            banned: false,
-            banReason: null,
-            banExpires: null,
-            ...additionalFields,
-            id,
-        }),
     },
 
     socialProviders: {
@@ -34,11 +25,11 @@ export const auth = betterAuth({
     user: {
         additionalFields: {
             userType: {
-                type: "string",
-                required: false,
-                defaultValue: "Reader",
-                input: true,
+                defaultValue: "reader"
             },
+            plan: {
+                defaultValue: "free"
+            }
         },
     },
 

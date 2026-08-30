@@ -15,11 +15,11 @@ export default function LoginPage() {
     const [errorMsg, setErrorMsg] = useState("");
     const router = useRouter();
 
-    // পোর্টফোলিওর জন্য ডেমো ক্রেডেনশিয়াল
+    // Demo Credentials
     const demoAccounts = {
         admin: { email: "admin@example.com", password: "password123", role: "admin" },
         writer: { email: "writer@example.com", password: "password123", role: "writer" },
-        reader: { email: "reader@example.com", password: "password123", role: "user" },
+        reader: { email: "reader@example.com", password: "password123", role: "reader" },
     };
 
     const handleLoginSubmit = async (loginEmail, loginPassword) => {
@@ -38,9 +38,9 @@ export default function LoginPage() {
                 return;
             }
 
-            // লগইনের পর ইউজারের রোল ফেচ করে সঠিক ড্যাশবোর্ডে রিডাইরেক্ট
             const session = await authClient.getSession();
-            const userRole = session?.data?.user?.role || "user";
+            const userRole = session?.data?.user?.userType
+ || "reader";
 
             if (userRole === "admin") router.push("/dashboard/admin");
             else if (userRole === "writer") router.push("/dashboard/writer");
@@ -59,7 +59,7 @@ export default function LoginPage() {
 
     const handleDemoLogin = (role) => {
         const account = demoAccounts[role];
-        setEmail(account.email); // UI-তে দেখানোর জন্য
+        setEmail(account.email);
         setPassword(account.password);
         handleLoginSubmit(account.email, account.password);
     };
