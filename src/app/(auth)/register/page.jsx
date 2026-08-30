@@ -14,7 +14,7 @@ export default function RegisterPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [selectedRole, setSelectedRole] = useState("Reader");
+    const [selectedRole, setSelectedRole] = useState("reader");
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const router = useRouter();

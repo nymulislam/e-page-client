@@ -11,10 +11,10 @@ import { authClient } from "@/app/lib/auth-client";
 
 const menuItems = {
     reader: [
-        { name: "My Profile", icon: Settings, path: "/dashboard/user" },
-        { name: "Purchased Ebooks", icon: BookOpen, path: "/dashboard/user/my-ebooks" },
-        { name: "Purchase History", icon: History, path: "/dashboard/user/purchase-history" },
-        { name: "Wishlist", icon: Bookmark, path: "/dashboard/user/wishlist" },
+        { name: "My Profile", icon: Settings, path: "/dashboard/reader" },
+        { name: "Purchased Ebooks", icon: BookOpen, path: "/dashboard/reader/my-ebooks" },
+        { name: "Purchase History", icon: History, path: "/dashboard/reader/purchase-history" },
+        { name: "Wishlist", icon: Bookmark, path: "/dashboard/reader/wishlist" },
     ],
     writer: [
         { name: "Author's Desk", icon: LayoutDashboard, path: "/dashboard/writer" },
