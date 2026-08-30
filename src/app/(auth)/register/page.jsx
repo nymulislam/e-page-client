@@ -31,11 +31,12 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
+            // Send 'userType' instead of 'role' to avoid Better-Auth restrictions
             const { data, error } = await authClient.signUp.email({
                 email,
                 password,
                 name,
-                // যদি আপনার ব্যাকএন্ড বা database-এ role ফিল্ড থাকে তবে এখানে পাস করতে পারেন
+                userType: selectedRole, // "Reader" or "Writer"
                 callbackURL: "/",
             });
 
@@ -45,7 +46,6 @@ export default function RegisterPage() {
                 return;
             }
 
-            // সফলভাবে রেজিস্টার হলে রিডাইরেক্ট করুন
             router.push("/");
         } catch (err) {
             setErrorMsg("An unexpected error occurred.");

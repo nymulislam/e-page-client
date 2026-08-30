@@ -5,12 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { FiHome, FiBookOpen, FiLayout, FiLogIn } from "react-icons/fi";
 import { authClient } from "@/app/lib/auth-client";
 import { Bars } from "@gravity-ui/icons";
-import {
-    Button,
-    Dropdown,
-    Header,
-    Label,
-} from "@heroui/react";
+import { Button, Dropdown, Header, Label } from "@heroui/react";
 
 const Navbar = () => {
     const pathname = usePathname();
@@ -27,17 +22,26 @@ const Navbar = () => {
         });
     };
 
+    // ইউজারের রোল অনুযায়ী ড্যাশবোর্ডের পাথ নির্ধারণ (ডিফল্ট: user)
+    const role = user?.role || "user"; 
+    const dashboardPath = `/dashboard/${role}`;
+
+    // বেসিক ন্যাভিগেশন লিংক
     const navLinks = [
         { name: "Home", path: "/", icon: <FiHome /> },
         { name: "Browse Ebooks", path: "/ebooks", icon: <FiBookOpen /> },
-        { name: "Dashboard", path: "/dashboard/admin", icon: <FiLayout /> },
     ];
+
+    // ইউজার লগইন থাকলে ড্যাশবোর্ড লিংক যুক্ত হবে
+    if (user) {
+        navLinks.push({ name: "Dashboard", path: dashboardPath, icon: <FiLayout /> });
+    }
 
     const renderDesktopLinks = navLinks.map((link) => (
         <li key={link.path}>
             <Link
                 href={link.path}
-                className={`font-medium tracking-wide transition-all duration-300 px-4 py-2 rounded-full ${pathname === link.path
+                className={`font-medium tracking-wide transition-all duration-300 px-4 py-2 rounded-full ${pathname.startsWith(link.path) && link.path !== '/' || pathname === link.path
                         ? "text-amber-900 bg-amber-500/15"
                         : "text-amber-800/70 hover:text-amber-900 hover:bg-amber-50"
                     }`}
@@ -52,17 +56,14 @@ const Navbar = () => {
             <div className="navbar container mx-auto px-4 lg:px-8 h-20">
                 {/* Logo + Mobile Menu */}
                 <div className="navbar-start">
-                    {/* HeroUI Dropdown – only visible on mobile */}
                     <div className="lg:hidden">
                         <Dropdown>
-                            <Button isIconOnly aria-label="Menu" variant="">
+                            <Button isIconOnly aria-label="Menu" variant="light">
                                 <Bars className="outline-none text-amber-950" size={24} />
                             </Button>
                             <Dropdown.Popover className="min-w-[220px] bg-[#FDFBF7] border border-amber-200/60 shadow-xl rounded-2xl p-2">
                                 <Dropdown.Menu
-                                    onAction={(key) => {
-                                        router.push(key);
-                                    }}
+                                    onAction={(key) => router.push(key)}
                                 >
                                     <Dropdown.Section>
                                         <Header className="text-amber-900/60 text-xs font-medium uppercase tracking-wider px-2">
@@ -90,11 +91,7 @@ const Navbar = () => {
                         </Dropdown>
                     </div>
 
-                    {/* Logo */}
-                    <Link
-                        href="/"
-                        className="text-2xl md:text-3xl font-bold tracking-wider text-amber-950 font-serif flex items-center gap-1"
-                    >
+                    <Link href="/" className="text-2xl md:text-3xl font-bold tracking-wider text-amber-950 font-serif flex items-center gap-1">
                         E-Page<span className="text-amber-600">.</span>
                     </Link>
                 </div>
@@ -113,26 +110,16 @@ const Navbar = () => {
                             <span className="hidden xl:inline-block text-xs font-semibold text-amber-900/70">
                                 Hi, {user.name || "Scholar"}
                             </span>
-                            <button
-                                onClick={handleLogout}
-                                className="btn btn-outline border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400 btn-sm lg:btn-md rounded-full px-6 cursor-pointer"
-                            >
+                            <button onClick={handleLogout} className="btn btn-outline border-amber-300 text-amber-800 hover:bg-amber-50 hover:border-amber-400 btn-sm lg:btn-md rounded-full px-6 cursor-pointer">
                                 Logout
                             </button>
                         </div>
                     ) : (
                         <div className="flex items-center gap-3">
-                            <Link
-                                href="/login"
-                                className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-amber-950 hover:text-amber-700 transition-colors px-3 py-2"
-                            >
-                                <FiLogIn size={16} className="text-amber-700" />
-                                Sign In
+                            <Link href="/login" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-amber-950 hover:text-amber-700 transition-colors px-3 py-2">
+                                <FiLogIn size={16} className="text-amber-700" /> Sign In
                             </Link>
-                            <Link
-                                href="/register"
-                                className="btn bg-amber-950 hover:bg-amber-900 text-amber-50 border-none btn-sm lg:btn-md shadow-md rounded-full px-6 transition-all hover:scale-105"
-                            >
+                            <Link href="/register" className="btn bg-amber-950 hover:bg-amber-900 text-amber-50 border-none btn-sm lg:btn-md shadow-md rounded-full px-6 transition-all hover:scale-105">
                                 Get Started
                             </Link>
                         </div>
