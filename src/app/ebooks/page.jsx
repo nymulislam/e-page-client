@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, startTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"; // useRouter ইম্পোর্ট করা হলো
 import {
     Search,
     SlidersHorizontal,
@@ -14,10 +14,15 @@ import {
     ChevronRight,
     MoreHorizontal,
 } from "lucide-react";
+import { authClient } from "@/app/lib/auth-client"; // Better-Auth ক্লায়েন্ট ইম্পোর্ট করা হলো
 
 function BrowseEbooksContent() {
     const searchParams = useSearchParams();
     const queryCategory = searchParams.get("category");
+    const router = useRouter();
+
+    // ইউজারের সেশন চেক করার জন্য
+    const { data: session } = authClient.useSession();
 
     const [allEbooks, setAllEbooks] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +48,7 @@ function BrowseEbooksContent() {
         fetchAllEbooks();
     }, []);
 
-    // Set category from URL query parameter – avoid cascading render with  startTransition
+    // Set category from URL query parameter
     useEffect(() => {
         if (queryCategory) {
             const formattedCategory =
@@ -82,14 +87,12 @@ function BrowseEbooksContent() {
 
     // Pagination calc
     const totalPages = Math.max(1, Math.ceil(filteredEbooks.length / itemsPerPage));
-    // Clamp currentPage to valid range
     const safePage = Math.min(Math.max(1, currentPage), totalPages);
     const paginatedEbooks = filteredEbooks.slice(
         (safePage - 1) * itemsPerPage,
         safePage * itemsPerPage
     );
 
-    // Handlers that reset page to 1 (no effect usage)
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
         setCurrentPage(1);
@@ -100,7 +103,18 @@ function BrowseEbooksContent() {
         setCurrentPage(1);
     };
 
-    // Page number generator
+    // বইয়ের ডিটেইলসে যাওয়ার সময় লগইন চেক করার ফাংশন
+    const handleCardClick = (e, ebookId) => {
+        e.preventDefault();
+        if (!session) {
+            // লগইন করা না থাকলে লগইন পেজে পাঠিয়ে দেবো
+            router.push("/login");
+        } else {
+            // লগইন করা থাকলে ডিটেইলস পেজে যাবে
+            router.push(`/ebooks/${ebookId}`);
+        }
+    };
+
     const getPageNumbers = () => {
         const pages = [];
         if (totalPages <= 5) {
@@ -153,10 +167,11 @@ function BrowseEbooksContent() {
                         <button
                             key={cat}
                             onClick={() => handleCategoryChange(cat)}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === cat
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                                selectedCategory === cat
                                     ? "bg-amber-950 text-amber-50 shadow-md"
                                     : "bg-white border border-amber-200 text-amber-900/70 hover:bg-amber-50"
-                                }`}
+                            }`}
                         >
                             {cat}
                         </button>
@@ -183,10 +198,10 @@ function BrowseEbooksContent() {
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
                             {paginatedEbooks.map((ebook) => (
-                                <Link
+                                <div
                                     key={ebook.id || ebook._id}
-                                    href={`/ebooks/${ebook.id || ebook._id}`}
-                                    className="group bg-white rounded-2xl p-4 border border-amber-200/80 shadow-sm hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+                                    onClick={(e) => handleCardClick(e, ebook.id || ebook._id)}
+                                    className="group bg-white rounded-2xl p-4 border border-amber-200/80 shadow-sm hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col justify-between relative overflow-hidden cursor-pointer"
                                 >
                                     {ebook.isSold && (
                                         <div className="absolute top-6 right-6 z-10 bg-amber-950/90 text-amber-200 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-md">
@@ -221,7 +236,7 @@ function BrowseEbooksContent() {
                                             <ShoppingBag size={16} />
                                         </span>
                                     </div>
-                                </Link>
+                                </div>
                             ))}
                         </div>
 
@@ -245,10 +260,11 @@ function BrowseEbooksContent() {
                                         <button
                                             key={pageNum}
                                             onClick={() => setCurrentPage(pageNum)}
-                                            className={`w-10 h-10 rounded-xl font-medium transition-all ${safePage === pageNum
+                                            className={`w-10 h-10 rounded-xl font-medium transition-all ${
+                                                safePage === pageNum
                                                     ? "bg-amber-950 text-amber-50 shadow-md"
                                                     : "bg-white border border-amber-200 text-amber-900 hover:bg-amber-50"
-                                                }`}
+                                            }`}
                                         >
                                             {pageNum}
                                         </button>
