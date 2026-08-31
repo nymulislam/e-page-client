@@ -26,8 +26,8 @@ const Footer = () => {
                         <ul className="space-y-3 text-sm text-stone-400">
                             <li><Link href="/" className="hover:text-amber-500 hover:translate-x-1 inline-block transition-all duration-300">Home</Link></li>
                             <li><Link href="/ebooks" className="hover:text-amber-500 hover:translate-x-1 inline-block transition-all duration-300">Browse Ebooks</Link></li>
-                            <li><Link href="/categories" className="hover:text-amber-500 hover:translate-x-1 inline-block transition-all duration-300">Genres & Topics</Link></li>
-                            <li><Link href="/dashboard" className="hover:text-amber-500 hover:translate-x-1 inline-block transition-all duration-300">Dashboard</Link></li>
+                            <li><Link href="/" className="hover:text-amber-500 hover:translate-x-1 inline-block transition-all duration-300">Genres & Topics</Link></li>
+                            <li><Link href="/" className="hover:text-amber-500 hover:translate-x-1 inline-block transition-all duration-300">Dashboard</Link></li>
                         </ul>
                     </div>
 
@@ -53,7 +53,7 @@ const Footer = () => {
                                 <FaFacebookF size={16} />
                             </a>
                             <a 
-                                href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter"
+                                href="https://x.com" target="_blank" rel="noreferrer" aria-label="X"
                                 className="w-10 h-10 rounded-full bg-stone-800 text-stone-300 flex items-center justify-center hover:bg-amber-700 hover:text-white hover:-translate-y-1 transition-all duration-300"
                             >
                                 <FaXTwitter size={16} />

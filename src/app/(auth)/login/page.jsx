@@ -44,7 +44,7 @@ export default function LoginPage() {
 
             if (userRole === "admin") router.push("/dashboard/admin");
             else if (userRole === "writer") router.push("/dashboard/writer");
-            else router.push("/dashboard/user"); 
+            else router.push("/dashboard/reader"); 
             
         } catch (err) {
             setErrorMsg("An unexpected error occurred during login.");
