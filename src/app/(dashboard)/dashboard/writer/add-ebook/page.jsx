@@ -18,9 +18,10 @@ export default function AddEBook({ ebookId, onSuccess }) {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({ title: "", price: "", description: "" });
 
+    const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     useEffect(() => {
         if (ebookId) {
-            fetch(`http://localhost:5000/ebooks/${ebookId}`)
+            fetch(`${apiURL}/ebooks/${ebookId}`)
                 .then(res => res.json())
                 .then(data => {
                     setFormData({ title: data.title, price: data.price, description: data.description });
@@ -79,8 +80,8 @@ export default function AddEBook({ ebookId, onSuccess }) {
 
         try {
             const url = ebookId
-                ? `http://localhost:5000/ebooks/${ebookId}`
-                : `http://localhost:5000/ebooks`;
+                ? `${apiURL}/ebooks/${ebookId}`
+                : `${apiURL}/ebooks`;
 
             const method = ebookId ? "PATCH" : "POST";
 
@@ -92,7 +93,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
 
             if (response.ok) {
                 if (onSuccess) {
-                    onSuccess(); // মডালের ভেতরে থাকলে এটি কল হবে
+                    onSuccess(); 
                 } else {
                     router.push("/dashboard/writer/manage-ebooks");
                 }

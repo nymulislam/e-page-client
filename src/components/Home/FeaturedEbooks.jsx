@@ -12,10 +12,12 @@ export default function FeaturedEbooks() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
 
+  const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const res = await fetch("http://localhost:5000/ebooks");
+        const res = await fetch(`${apiURL}/ebooks`);
         const data = await res.json();
         setFeaturedEbooks(data.slice(0, 6)); 
       } catch (error) {

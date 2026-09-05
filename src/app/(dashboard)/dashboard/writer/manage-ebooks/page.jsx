@@ -14,11 +14,12 @@ export default function ManageEbooks() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingEbookId, setEditingEbookId] = useState(null);
 
+    const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     const fetchEbooks = async () => {
         if (!session?.user?.email) return;
         try {
-            const res = await fetch(`http://localhost:5000/ebooks/writer/${session.user.email}`);
+            const res = await fetch(`${apiURL}/ebooks/writer/${session.user.email}`);
             const data = await res.json();
             setEbooks(data);
         } catch (error) {
@@ -34,7 +35,7 @@ export default function ManageEbooks() {
         const fetchEbooks = async () => {
             if (!session?.user?.email) return;
             try {
-                const res = await fetch(`http://localhost:5000/ebooks/writer/${session.user.email}`);
+                const res = await fetch(`${apiURL}/ebooks/writer/${session.user.email}`);
                 const data = await res.json();
                 setEbooks(data);
             } catch (error) {
@@ -45,12 +46,12 @@ export default function ManageEbooks() {
         };
 
         fetchEbooks();
-    }, [session?.user?.email]);
+    }, [session?.user?.email, apiURL]);
 
     const togglePublishStatus = async (id, currentStatus) => {
         try {
             const newStatus = !currentStatus;
-            const res = await fetch(`http://localhost:5000/ebooks/${id}`, {
+            const res = await fetch(`${apiURL}/ebooks/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ isSold: newStatus }),
@@ -70,7 +71,7 @@ export default function ManageEbooks() {
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/ebooks/${id}`, {
+            const res = await fetch(`${apiURL}/ebooks/${id}`, {
                 method: "DELETE",
             });
             if (res.ok) {

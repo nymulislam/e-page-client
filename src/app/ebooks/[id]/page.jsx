@@ -21,11 +21,13 @@ export default function EbookDetailsPage() {
     const currentUser = { name: "Naymul Islam", role: "Writer" }; 
     const [hasPurchased, setHasPurchased] = useState(false); 
 
+    const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
     useEffect(() => {
         const fetchEbookDetails = async () => {
             setIsLoading(true);
             try {
-                const res = await fetch(`http://localhost:5000/ebooks/${params?.id}`);
+                const res = await fetch(`${apiURL}/ebooks/${params?.id}`);
                 
                 if (res.ok) {
                     const data = await res.json();
@@ -45,7 +47,7 @@ export default function EbookDetailsPage() {
         if (params?.id) {
             fetchEbookDetails();
         }
-    }, [params]);
+    }, [params, apiURL]);
 
     const handlePurchase = () => {
         // Stripe Checkout Logic

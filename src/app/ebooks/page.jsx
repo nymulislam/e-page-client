@@ -2,8 +2,7 @@
 
 import { useState, useEffect, Suspense, startTransition } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation"; // useRouter ইম্পোর্ট করা হলো
+import { useSearchParams, useRouter } from "next/navigation";
 import {
     Search,
     SlidersHorizontal,
@@ -14,14 +13,14 @@ import {
     ChevronRight,
     MoreHorizontal,
 } from "lucide-react";
-import { authClient } from "@/app/lib/auth-client"; // Better-Auth ক্লায়েন্ট ইম্পোর্ট করা হলো
+import { authClient } from "@/app/lib/auth-client"; // Better-Auth 
 
 function BrowseEbooksContent() {
     const searchParams = useSearchParams();
     const queryCategory = searchParams.get("category");
     const router = useRouter();
 
-    // ইউজারের সেশন চেক করার জন্য
+    // user session check
     const { data: session } = authClient.useSession();
 
     const [allEbooks, setAllEbooks] = useState([]);
@@ -31,12 +30,14 @@ function BrowseEbooksContent() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
 
+    const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
     // Fetch ebooks
     useEffect(() => {
         const fetchAllEbooks = async () => {
             setIsLoading(true);
             try {
-                const res = await fetch("http://localhost:5000/ebooks");
+                const res = await fetch(`${apiURL}/ebooks`);
                 const data = await res.json();
                 setAllEbooks(data);
             } catch (error) {
@@ -46,7 +47,7 @@ function BrowseEbooksContent() {
             }
         };
         fetchAllEbooks();
-    }, []);
+    }, [apiURL]);
 
     // Set category from URL query parameter
     useEffect(() => {
@@ -103,14 +104,12 @@ function BrowseEbooksContent() {
         setCurrentPage(1);
     };
 
-    // বইয়ের ডিটেইলসে যাওয়ার সময় লগইন চেক করার ফাংশন
+
     const handleCardClick = (e, ebookId) => {
         e.preventDefault();
         if (!session) {
-            // লগইন করা না থাকলে লগইন পেজে পাঠিয়ে দেবো
             router.push("/login");
         } else {
-            // লগইন করা থাকলে ডিটেইলস পেজে যাবে
             router.push(`/ebooks/${ebookId}`);
         }
     };
@@ -167,11 +166,10 @@ function BrowseEbooksContent() {
                         <button
                             key={cat}
                             onClick={() => handleCategoryChange(cat)}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                                selectedCategory === cat
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === cat
                                     ? "bg-amber-950 text-amber-50 shadow-md"
                                     : "bg-white border border-amber-200 text-amber-900/70 hover:bg-amber-50"
-                            }`}
+                                }`}
                         >
                             {cat}
                         </button>
@@ -260,11 +258,10 @@ function BrowseEbooksContent() {
                                         <button
                                             key={pageNum}
                                             onClick={() => setCurrentPage(pageNum)}
-                                            className={`w-10 h-10 rounded-xl font-medium transition-all ${
-                                                safePage === pageNum
+                                            className={`w-10 h-10 rounded-xl font-medium transition-all ${safePage === pageNum
                                                     ? "bg-amber-950 text-amber-50 shadow-md"
                                                     : "bg-white border border-amber-200 text-amber-900 hover:bg-amber-50"
-                                            }`}
+                                                }`}
                                         >
                                             {pageNum}
                                         </button>
