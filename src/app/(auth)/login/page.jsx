@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AtSign, Shield, Eye, EyeOff, User, PenTool } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
 import { authClient } from "@/app/lib/auth-client";
 
 export default function LoginPage() {
@@ -25,7 +24,7 @@ export default function LoginPage() {
     const handleLoginSubmit = async (loginEmail, loginPassword) => {
         setErrorMsg("");
         setIsLoading(true);
-        
+
         try {
             const { data, error } = await authClient.signIn.email({
                 email: loginEmail,
@@ -40,12 +39,12 @@ export default function LoginPage() {
 
             const session = await authClient.getSession();
             const userRole = session?.data?.user?.role
- || "reader";
+                || "reader";
 
             if (userRole === "admin") router.push("/dashboard/admin");
             else if (userRole === "writer") router.push("/dashboard/writer");
-            else router.push("/dashboard/reader"); 
-            
+            else router.push("/dashboard/reader");
+
         } catch (err) {
             setErrorMsg("An unexpected error occurred during login.");
             setIsLoading(false);
@@ -62,13 +61,6 @@ export default function LoginPage() {
         setEmail(account.email);
         setPassword(account.password);
         handleLoginSubmit(account.email, account.password);
-    };
-
-    const handleGoogleLogin = async () => {
-        await authClient.signIn.social({
-            provider: "google",
-            callbackURL: "/",
-        });
     };
 
     return (
@@ -93,7 +85,7 @@ export default function LoginPage() {
                         Portfolio Demo Login
                     </p>
                     <div className="grid grid-cols-3 gap-2">
-                        <button 
+                        <button
                             onClick={() => handleDemoLogin("admin")}
                             disabled={isLoading}
                             className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-800 transition-colors cursor-pointer"
@@ -101,7 +93,7 @@ export default function LoginPage() {
                             <Shield size={16} />
                             <span className="text-[10px] font-bold">Admin</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => handleDemoLogin("writer")}
                             disabled={isLoading}
                             className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 transition-colors cursor-pointer"
@@ -109,7 +101,7 @@ export default function LoginPage() {
                             <PenTool size={16} />
                             <span className="text-[10px] font-bold">Writer</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => handleDemoLogin("reader")}
                             disabled={isLoading}
                             className="flex flex-col items-center justify-center gap-1 p-2 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-800 transition-colors cursor-pointer"
@@ -157,7 +149,7 @@ export default function LoginPage() {
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                     </div>
-                    
+
                     <button
                         type="submit" disabled={isLoading}
                         className="w-full bg-amber-950 hover:bg-amber-900 text-amber-50 font-medium py-3.5 rounded-xl transition-all shadow-lg hover:shadow-amber-900/20 flex justify-center items-center gap-2 mt-2 cursor-pointer"
