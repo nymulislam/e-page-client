@@ -1,6 +1,7 @@
 import Navbar from "@/components/Shared/Navbar";
 import "./globals.css";
 import Footer from "@/components/Shared/Footer";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "E-Page | Unfold Your Next Great Story",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
         
         <Navbar />
         {children}
+         <Toaster />
         <Footer />
       </body>
     </html>

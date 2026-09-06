@@ -9,6 +9,7 @@ import {
     Calendar, Tag, User, BookOpen, AlertCircle
 } from "lucide-react";
 import { authClient } from "@/app/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function EbookDetailsPage() {
     const params = useParams();
@@ -103,9 +104,34 @@ export default function EbookDetailsPage() {
     };
 
     // purchase logic
-    const handlePurchase = () => {
-        // Stripe Checkout Logic
-        console.log("Redirecting to Stripe...");
+    const handlePurchase = async () => {
+        if (!currentUser?.email) {
+            router.push('/login');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiURL}/api/create-checkout-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ebookId: ebook._id,
+                    userEmail: currentUser.email,
+                    userName: currentUser.name,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                toast.error(data.error || 'Payment failed. Try again.');
+            }
+        } catch (error) {
+            console.error('Purchase error:', error);
+            toast.error('Something went wrong. Please try again.');
+        }
     };
 
     const formatDate = (dateString) => {
