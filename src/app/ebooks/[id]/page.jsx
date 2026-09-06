@@ -4,22 +4,26 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { 
-    ShoppingBag, Bookmark, CheckCircle2, ArrowLeft, 
-    Calendar, Tag, User, BookOpen, AlertCircle 
+import {
+    ShoppingBag, Bookmark, CheckCircle2, ArrowLeft,
+    Calendar, Tag, User, BookOpen, AlertCircle
 } from "lucide-react";
+import { authClient } from "@/app/lib/auth-client";
 
 export default function EbookDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    
+
     const [ebook, setEbook] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isBookmarked, setIsBookmarked] = useState(false);
-    
-    // Auth context
-    const currentUser = { name: "Naymul Islam", role: "Writer" }; 
-    const [hasPurchased, setHasPurchased] = useState(false); 
+    const { data: session, isPending } = authClient.useSession();
+
+    // Auth session
+    const currentUser = session?.user;
+
+
+    const [hasPurchased, setHasPurchased] = useState(false);
 
     const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -27,18 +31,34 @@ export default function EbookDetailsPage() {
         const fetchEbookDetails = async () => {
             setIsLoading(true);
             try {
+                // 1. ebook detail
                 const res = await fetch(`${apiURL}/ebooks/${params?.id}`);
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    setEbook(data);
-                    // checkPurchased API: setHasPurchased(data.purchased)
-                } else {
+                if (!res.ok) {
                     setEbook(null);
+                    setIsLoading(false);
+                    return;
                 }
+                const data = await res.json();
+                setEbook(data);
+
+                // 2. wishlist check if have user
+                if (currentUser?.email) {
+                    try {
+                        const wishRes = await fetch(`${apiURL}/wishlist/check/${currentUser.email}/${params?.id}`);
+
+                        if (wishRes.ok) {
+                            const wishData = await wishRes.json();
+                            setIsBookmarked(wishData.isBookmarked || false);
+                        }
+                    } catch (wishErr) {
+                        setIsBookmarked(false);
+                    }
+                }
+
             } catch (error) {
                 console.error("Error fetching ebook details:", error);
                 setEbook(null);
+
             } finally {
                 setIsLoading(false);
             }
@@ -47,8 +67,42 @@ export default function EbookDetailsPage() {
         if (params?.id) {
             fetchEbookDetails();
         }
-    }, [params, apiURL]);
+    }, [params, apiURL, currentUser?.email]);
 
+
+    // bookmark toggle handler
+    const toggleBookmark = async () => {
+        if (!ebook || !currentUser?.email) return;
+
+        if (isBookmarked) {
+            // remove
+            const res = await fetch(`${apiURL}/wishlist/${currentUser.email}/${ebook._id}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            if (data.deletedCount > 0) setIsBookmarked(false);
+        } else {
+            // add bookmark
+            const wishlistItem = {
+                userEmail: currentUser.email,
+                ebookId: ebook._id,
+                title: ebook.title,
+                writer: ebook.writer,
+                price: ebook.price,
+                cover: ebook.cover
+            };
+
+            const res = await fetch(`${apiURL}/wishlist`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(wishlistItem)
+            });
+            const data = await res.json();
+            if (data.insertedId) setIsBookmarked(true);
+        }
+    };
+
+    // purchase logic
     const handlePurchase = () => {
         // Stripe Checkout Logic
         console.log("Redirecting to Stripe...");
@@ -95,7 +149,7 @@ export default function EbookDetailsPage() {
                     <p className="text-amber-900/60 mb-8">
                         The manuscript you are looking for does not exist or has been removed from our archives.
                     </p>
-                    <button 
+                    <button
                         onClick={() => router.back()}
                         className="bg-amber-950 hover:bg-amber-900 text-amber-50 font-medium px-8 py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 mx-auto"
                     >
@@ -112,7 +166,7 @@ export default function EbookDetailsPage() {
     return (
         <div className="min-h-screen bg-[#FDFBF7] px-4 md:px-12 py-10">
             <div className="max-w-6xl mx-auto">
-                <button 
+                <button
                     onClick={() => router.back()}
                     className="flex items-center gap-2 text-amber-900/60 hover:text-amber-950 font-medium mb-8 transition-colors"
                 >
@@ -120,7 +174,7 @@ export default function EbookDetailsPage() {
                 </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-                    
+
                     {/* Left Column: Cover Image & Bookmark */}
                     <div className="lg:col-span-5 relative group">
                         <div className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden bg-amber-50 border border-amber-200 shadow-xl shadow-amber-900/10">
@@ -131,20 +185,19 @@ export default function EbookDetailsPage() {
                                 priority
                                 className="object-cover"
                             />
-                            
+
                             {ebook.isSold && (
                                 <div className="absolute top-4 left-4 z-10 bg-amber-950/90 text-amber-200 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1.5 shadow-lg">
                                     <CheckCircle2 size={16} className="text-amber-400" /> Highly Purchased
                                 </div>
                             )}
 
-                            <button 
-                                onClick={() => setIsBookmarked(!isBookmarked)}
-                                className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all shadow-lg ${
-                                    isBookmarked 
-                                        ? "bg-amber-500 text-white" 
-                                        : "bg-white/80 text-amber-950 hover:bg-white"
-                                }`}
+                            <button
+                                onClick={toggleBookmark}
+                                className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-2xl backdrop-blur-md flex items-center justify-center transition-all shadow-lg ${isBookmarked
+                                    ? "bg-amber-500 text-white"
+                                    : "bg-white/80 text-amber-950 hover:bg-white"
+                                    }`}
                             >
                                 <Bookmark size={20} className={isBookmarked ? "fill-current" : ""} />
                             </button>
@@ -163,7 +216,7 @@ export default function EbookDetailsPage() {
                             {ebook.title}
                         </h1>
 
-                        <Link 
+                        <Link
                             href={`/writers/${(ebook.writer || '').toLowerCase().replace(/\s+/g, '-')}`}
                             className="inline-flex items-center gap-2 text-lg text-amber-700 hover:text-amber-900 font-medium transition-colors mb-8 w-max"
                         >
@@ -201,7 +254,7 @@ export default function EbookDetailsPage() {
                             <div className="text-4xl font-bold text-amber-950">
                                 {priceDisplay}
                             </div>
-                            
+
                             <div className="flex-1 w-full">
                                 {isOwnEbook ? (
                                     <button disabled className="w-full bg-amber-100 text-amber-900/50 font-medium py-4 rounded-2xl cursor-not-allowed flex items-center justify-center gap-2 border border-amber-200">
@@ -212,7 +265,7 @@ export default function EbookDetailsPage() {
                                         <CheckCircle2 size={20} /> Already Purchased (Read Now)
                                     </button>
                                 ) : (
-                                    <button 
+                                    <button
                                         onClick={handlePurchase}
                                         className="w-full bg-amber-950 hover:bg-amber-900 text-amber-50 font-medium py-4 rounded-2xl transition-all shadow-xl hover:shadow-amber-900/20 flex items-center justify-center gap-2"
                                     >
