@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
     ShoppingBag, Bookmark, CheckCircle2, ArrowLeft,
-    Calendar, Tag, User, BookOpen, AlertCircle
+    Calendar, Tag, User, BookOpen, AlertCircle, Loader2
 } from "lucide-react";
 import { authClient } from "@/app/lib/auth-client";
 import toast from "react-hot-toast";
@@ -18,12 +18,10 @@ export default function EbookDetailsPage() {
     const [ebook, setEbook] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isPurchasing, setIsPurchasing] = useState(false); // ✅ নতুন state
     const { data: session, isPending } = authClient.useSession();
 
-    // Auth session
     const currentUser = session?.user;
-
-
     const [hasPurchased, setHasPurchased] = useState(false);
 
     const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -32,7 +30,6 @@ export default function EbookDetailsPage() {
         const fetchEbookDetails = async () => {
             setIsLoading(true);
             try {
-                // 1. ebook detail
                 const res = await fetch(`${apiURL}/ebooks/${params?.id}`);
                 if (!res.ok) {
                     setEbook(null);
@@ -42,11 +39,9 @@ export default function EbookDetailsPage() {
                 const data = await res.json();
                 setEbook(data);
 
-                // 2. wishlist check if have user
                 if (currentUser?.email) {
                     try {
                         const wishRes = await fetch(`${apiURL}/wishlist/check/${currentUser.email}/${params?.id}`);
-
                         if (wishRes.ok) {
                             const wishData = await wishRes.json();
                             setIsBookmarked(wishData.isBookmarked || false);
@@ -56,10 +51,22 @@ export default function EbookDetailsPage() {
                     }
                 }
 
+                // Purchase check
+                if (currentUser?.email) {
+                    try {
+                        const purchaseRes = await fetch(`${apiURL}/api/purchases/check/${currentUser.email}/${params?.id}`);
+                        if (purchaseRes.ok) {
+                            const purchaseData = await purchaseRes.json();
+                            setHasPurchased(purchaseData.purchased || false);
+                        }
+                    } catch (purchaseErr) {
+                        setHasPurchased(false);
+                    }
+                }
+
             } catch (error) {
                 console.error("Error fetching ebook details:", error);
                 setEbook(null);
-
             } finally {
                 setIsLoading(false);
             }
@@ -70,20 +77,16 @@ export default function EbookDetailsPage() {
         }
     }, [params, apiURL, currentUser?.email]);
 
-
-    // bookmark toggle handler
     const toggleBookmark = async () => {
         if (!ebook || !currentUser?.email) return;
 
         if (isBookmarked) {
-            // remove
             const res = await fetch(`${apiURL}/wishlist/${currentUser.email}/${ebook._id}`, {
                 method: 'DELETE'
             });
             const data = await res.json();
             if (data.deletedCount > 0) setIsBookmarked(false);
         } else {
-            // add bookmark
             const wishlistItem = {
                 userEmail: currentUser.email,
                 ebookId: ebook._id,
@@ -92,7 +95,6 @@ export default function EbookDetailsPage() {
                 price: ebook.price,
                 cover: ebook.cover
             };
-
             const res = await fetch(`${apiURL}/wishlist`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -103,12 +105,14 @@ export default function EbookDetailsPage() {
         }
     };
 
-    // purchase logic
     const handlePurchase = async () => {
         if (!currentUser?.email) {
             router.push('/login');
             return;
         }
+
+        // ✅ লোডিং শুরু
+        setIsPurchasing(true);
 
         try {
             const response = await fetch(`${apiURL}/api/create-checkout-session`, {
@@ -127,11 +131,14 @@ export default function EbookDetailsPage() {
                 window.location.href = data.url;
             } else {
                 toast.error(data.error || 'Payment failed. Try again.');
+                setIsPurchasing(false); // ✅ error হলে লোডিং বন্ধ
             }
         } catch (error) {
             console.error('Purchase error:', error);
             toast.error('Something went wrong. Please try again.');
+            setIsPurchasing(false); // ✅ error হলে লোডিং বন্ধ
         }
+        // সফল হলে লোডিং বন্ধ করার দরকার নেই কারণ পেজ রিলোড হবে
     };
 
     const formatDate = (dateString) => {
@@ -201,7 +208,6 @@ export default function EbookDetailsPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
 
-                    {/* Left Column: Cover Image & Bookmark */}
                     <div className="lg:col-span-5 relative group">
                         <div className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden bg-amber-50 border border-amber-200 shadow-xl shadow-amber-900/10">
                             <Image
@@ -230,7 +236,6 @@ export default function EbookDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Right Column: Ebook Details */}
                     <div className="lg:col-span-7 flex flex-col justify-center">
                         <div className="flex items-center gap-3 mb-4">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-100/60 border border-amber-200 text-amber-900 text-xs font-bold uppercase tracking-wider">
@@ -293,9 +298,22 @@ export default function EbookDetailsPage() {
                                 ) : (
                                     <button
                                         onClick={handlePurchase}
-                                        className="w-full bg-amber-950 hover:bg-amber-900 text-amber-50 font-medium py-4 rounded-2xl transition-all shadow-xl hover:shadow-amber-900/20 flex items-center justify-center gap-2"
+                                        disabled={isPurchasing}
+                                        className={`w-full font-medium py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-xl ${isPurchasing
+                                            ? 'bg-amber-400 cursor-not-allowed'
+                                            : 'bg-amber-950 hover:bg-amber-900 hover:shadow-amber-900/20'
+                                            } text-amber-50`}
                                     >
-                                        <ShoppingBag size={20} /> Purchase Manuscript
+                                        {isPurchasing ? (
+                                            <>
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ShoppingBag size={20} /> Purchase Manuscript
+                                            </>
+                                        )}
                                     </button>
                                 )}
                             </div>

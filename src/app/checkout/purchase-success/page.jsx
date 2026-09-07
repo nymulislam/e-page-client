@@ -13,10 +13,15 @@ export default function PurchaseSuccess() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const { data: session } = authClient.useSession();
-    const userEmail = session?.user.email || '';
+    // ✅ isPending ব্যবহার করুন
+    const { data: session, isPending } = authClient.useSession();
+    const userEmail = session?.user?.email || '';
 
     useEffect(() => {
+        // সেশন লোড হওয়া পর্যন্ত অপেক্ষা করুন
+        if (isPending) return;
+
+        // সেশন লোড হয়ে গেলে, কিন্তু ইউজার নেই
         if (!sessionId || !ebookId) {
             startTransition(() => {
                 setError('Missing payment information');
@@ -33,7 +38,6 @@ export default function PurchaseSuccess() {
             return;
         }
 
-
         let isMounted = true;
 
         const verifyPayment = async () => {
@@ -42,13 +46,11 @@ export default function PurchaseSuccess() {
                     `${process.env.NEXT_PUBLIC_API_URL}/api/verify-payment?session_id=${sessionId}&ebook_id=${ebookId}&user_email=${userEmail}`
                 );
 
-                // ✅ res.ok চেক করুন – ৪০০/৫০০ হ্যান্ডেল করুন
                 if (!res.ok) {
                     const errorText = await res.text();
                     console.error('Verification error:', errorText);
                     throw new Error('Payment verification failed');
                 }
-
 
                 const data = await res.json();
 
@@ -67,7 +69,7 @@ export default function PurchaseSuccess() {
             } catch (err) {
                 if (!isMounted) return;
                 startTransition(() => {
-                    setError('Failed to verify payment');
+                    setError(err.message || 'Failed to verify payment');
                     setLoading(false);
                 });
             }
@@ -78,8 +80,21 @@ export default function PurchaseSuccess() {
         return () => {
             isMounted = false;
         };
-    }, [sessionId, ebookId, userEmail]);
+    }, [sessionId, ebookId, userEmail, isPending]); // ✅ isPending dependency যোগ করুন
 
+    // ✅ সেশন লোড হচ্ছে – স্পিনার দেখান
+    if (isPending) {
+        return (
+            <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-amber-600 mx-auto mb-4" />
+                    <p className="text-amber-900/60">Loading session...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // ✅ লোডিং স্টেট (পেমেন্ট ভেরিফিকেশন চলছে)
     if (loading) {
         return (
             <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
@@ -91,6 +106,7 @@ export default function PurchaseSuccess() {
         );
     }
 
+    // ✅ এরর স্টেট
     if (error) {
         return (
             <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
@@ -113,6 +129,7 @@ export default function PurchaseSuccess() {
         );
     }
 
+    // ✅ সাফল্য
     return (
         <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
             <div className="bg-white rounded-3xl p-10 max-w-md text-center shadow-xl border border-amber-100">
