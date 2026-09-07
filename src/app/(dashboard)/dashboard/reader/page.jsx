@@ -1,10 +1,53 @@
 "use client";
 import {
     Mail, MapPin, Calendar, ShieldCheck,
-    Edit3, Sparkles, Award, Hexagon
+    Edit3, Sparkles, Award, Hexagon, Loader2
 } from "lucide-react";
+import { authClient } from "@/app/lib/auth-client";
+import { useState, useEffect } from "react";
 
 export default function UserProfile() {
+    const { data: session, isPending } = authClient.useSession();
+    const user = session?.user;
+
+    // Format join date
+    const joinDate = user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric'
+        })
+        : 'N/A';
+
+    // Get user initials
+    const getInitials = (name) => {
+        if (!name) return '?';
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    if (isPending) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Loader2 className="h-10 w-10 animate-spin text-amber-600" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="space-y-8 max-w-5xl mx-auto">
+                <div className="text-center p-12 bg-white rounded-2xl border border-amber-200 shadow-sm">
+                    <h3 className="text-lg font-serif text-amber-950">Please Login</h3>
+                    <p className="text-amber-900/60 mt-1">You need to be logged in to view your profile.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
 
@@ -26,7 +69,7 @@ export default function UserProfile() {
                 </button>
             </div>
 
-            {/* Premium Profile Card (Asymmetric Layout) */}
+            {/* Premium Profile Card */}
             <div className="relative bg-white/70 backdrop-blur-2xl border border-amber-900/10 rounded-[2rem] p-8 md:p-10 shadow-sm overflow-hidden flex flex-col md:flex-row gap-10 items-center md:items-stretch">
 
                 {/* Decorative Background Blur */}
@@ -39,7 +82,7 @@ export default function UserProfile() {
                     <div className="relative group cursor-pointer mb-6">
                         <div className="absolute inset-0 bg-amber-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
                         <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-amber-800 via-amber-900 to-amber-950 flex items-center justify-center text-amber-50 text-5xl font-serif border-4 border-white shadow-xl group-hover:scale-105 transition-transform duration-500">
-                            N
+                            {getInitials(user.name)}
                         </div>
                         {/* Floating Verified Badge */}
                         <div className="absolute bottom-1 right-1 bg-white text-amber-600 p-2 rounded-full shadow-lg border border-amber-100">
@@ -47,11 +90,11 @@ export default function UserProfile() {
                         </div>
                     </div>
 
-                    <h2 className="text-3xl font-serif text-amber-950">Naimul Islam</h2>
+                    <h2 className="text-3xl font-serif text-amber-950">{user.name}</h2>
 
                     <div className="flex flex-wrap items-center gap-2 mt-4 justify-center md:justify-start">
                         <span className="px-3 py-1 bg-gradient-to-r from-amber-100 to-amber-50 text-amber-800 text-xs font-semibold tracking-widest uppercase rounded-full border border-amber-200/50 shadow-sm">
-                            Premium Reader
+                            {user.userType === 'writer' ? 'Writer' : 'Reader'}
                         </span>
                         <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold tracking-widest uppercase rounded-full border border-emerald-200/50 flex items-center gap-1.5 shadow-sm">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -63,10 +106,10 @@ export default function UserProfile() {
                 {/* Right Column: Information Grid */}
                 <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-5 items-center content-center">
                     {[
-                        { label: "Email Address", value: "naimul@example.com", icon: Mail },
+                        { label: "Email Address", value: user.email, icon: Mail },
                         { label: "Location", value: "Dhaka, Bangladesh", icon: MapPin },
-                        { label: "Joined Date", value: "February 2026", icon: Calendar },
-                        { label: "Membership", value: "Lifetime Access", icon: Award },
+                        { label: "Joined Date", value: joinDate, icon: Calendar },
+                        { label: "Membership", value: user.plan === 'premium' ? 'Premium' : 'Free', icon: Award },
                     ].map((info, i) => (
                         <div key={i} className="group bg-white/60 hover:bg-white p-5 rounded-2xl border border-amber-900/5 hover:border-amber-900/20 shadow-sm hover:shadow-md transition-all duration-300 flex items-start gap-4">
                             <div className="mt-0.5 p-2.5 bg-amber-50 text-amber-800 rounded-xl group-hover:bg-amber-100 group-hover:scale-110 transition-all duration-300">
