@@ -112,11 +112,23 @@ export default function ManageUsers() {
             </thead>
             <tbody className="divide-y divide-amber-900/5">
               {loading ? (
-                <tr>
-                  <td colSpan="4" className="p-8 text-center text-amber-900/50">
-                    Loading users...
-                  </td>
-                </tr>
+                [...Array(5)].map((_, index) => (
+                  <tr key={index} className="animate-pulse">
+                    <td className="p-4">
+                      <div className="h-4 bg-amber-900/10 rounded w-3/4"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-4 bg-amber-900/10 rounded w-1/2"></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="h-6 bg-amber-900/10 rounded-md w-20"></div>
+                    </td>
+                    <td className="p-4 flex items-center justify-end gap-3">
+                      <div className="h-9 bg-amber-900/10 rounded-lg w-36"></div>
+                      <div className="h-9 bg-amber-900/10 rounded-lg w-9"></div>
+                    </td>
+                  </tr>
+                ))
               ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-amber-50/30 transition-colors">
