@@ -80,7 +80,7 @@ export default function ManageEbooks() {
         }
     };
 
-    // সার্চ ফিল্টারিং
+    //  search filtering
     const filteredEbooks = ebooks.filter((book) => {
         const titleMatch = book.title?.toLowerCase().includes(searchQuery.toLowerCase());
         const writerMatch = book.writer?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,7 +88,7 @@ export default function ManageEbooks() {
         return titleMatch || writerMatch;
     });
 
-    // পেজিনেশন লজিক
+    // pagination logic
     const totalPages = Math.ceil(filteredEbooks.length / itemsPerPage);
     const paginatedEbooks = filteredEbooks.slice(
         (currentPage - 1) * itemsPerPage,
@@ -114,7 +114,7 @@ export default function ManageEbooks() {
                         value={searchQuery}
                         onChange={(e) => {
                             setSearchQuery(e.target.value);
-                            setCurrentPage(1); // সার্চ করার সময় প্রথম পেজে রিডাইরেক্ট হবে
+                            setCurrentPage(1);
                         }}
                         className="pl-10 pr-4 py-2 bg-white border border-amber-900/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm w-full sm:w-72 transition-all"
                     />
@@ -140,20 +140,20 @@ export default function ManageEbooks() {
                                 [...Array(5)].map((_, index) => (
                                     <tr key={index} className="animate-pulse">
                                         <td className="p-4">
-                                            <div className="h-4 bg-amber-900/10 rounded w-3/4"></div>
+                                            <div className="h-4 bg-amber-100 rounded w-3/4"></div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="h-4 bg-amber-900/10 rounded w-1/2"></div>
+                                            <div className="h-4 bg-amber-100 rounded w-1/2"></div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="h-4 bg-amber-900/10 rounded w-1/4"></div>
+                                            <div className="h-4 bg-amber-100 rounded w-1/4"></div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="h-6 bg-amber-900/10 rounded-md w-24"></div>
+                                            <div className="h-6 bg-amber-100 rounded-md w-24"></div>
                                         </td>
                                         <td className="p-4 flex items-center justify-end gap-2">
-                                            <div className="h-8 bg-amber-900/10 rounded w-20"></div>
-                                            <div className="h-8 bg-amber-900/10 rounded w-8"></div>
+                                            <div className="h-8 bg-amber-100 rounded w-20"></div>
+                                            <div className="h-8 bg-amber-100 rounded w-8"></div>
                                         </td>
                                     </tr>
                                 ))

@@ -6,7 +6,7 @@ import { Select, ListBox, Label, TextField, InputGroup, TextArea, Surface } from
 import { authClient } from "@/app/lib/auth-client";
 
 const categories = ["Technology", "Literature", "History", "Science", "Poetry", "Islamic", "Mystery"];
-const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY; 
+const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
 // onSuccess 
 export default function AddEBook({ ebookId, onSuccess }) {
@@ -19,6 +19,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
     const [formData, setFormData] = useState({ title: "", price: "", description: "" });
 
     const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
     useEffect(() => {
         if (ebookId) {
             fetch(`${apiURL}/ebooks/${ebookId}`)
@@ -29,7 +30,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
                     setPreviewImage(data.cover);
                 });
         }
-    }, [ebookId]);
+    }, [ebookId, apiURL]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -43,7 +44,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
         e.preventDefault();
         setIsLoading(true);
 
-        let coverImageUrl = previewImage; 
+        let coverImageUrl = previewImage;
         if (imageFile) {
             const imgData = new FormData();
             imgData.append("image", imageFile);
@@ -75,7 +76,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
 
         //
         if (!ebookId) {
-            ebookData.isSold = false; 
+            ebookData.isSold = false;
         }
 
         try {
@@ -93,7 +94,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
 
             if (response.ok) {
                 if (onSuccess) {
-                    onSuccess(); 
+                    onSuccess();
                 } else {
                     router.push("/dashboard/writer/manage-ebooks");
                 }
@@ -135,15 +136,28 @@ export default function AddEBook({ ebookId, onSuccess }) {
 
                                 <div className="space-y-2">
                                     <Label className="text-sm font-semibold text-amber-950 block mb-2">Genre / Category</Label>
-                                    <Select selectedKeys={selectedGenre ? new Set([selectedGenre]) : new Set()} onSelectionChange={(keys) => setSelectedGenre(Array.from(keys)[0] || "")}>
-                                        <Select.Trigger className="w-full px-4 py-3.5 bg-[#FDFBF7] border border-amber-900/15 rounded-xl text-sm focus:outline-none">
+
+                                    <Select
+                                        className="w-full"
+                                        placeholder="Select a genre"
+                                        value={selectedGenre || ""}
+                                        onChange={(value) => setSelectedGenre(value || "")}
+                                    >
+                                        <Select.Trigger className="w-full px-4 py-3.5 bg-[#FDFBF7] border border-amber-900/15 rounded-xl text-sm text-amber-950 focus:outline-none focus:border-amber-600 focus:ring-4 focus:ring-amber-600/10 transition-all flex items-center justify-between cursor-pointer">
                                             <Select.Value placeholder="Select a genre" />
+                                            <Select.Indicator className="text-amber-900/50" />
                                         </Select.Trigger>
-                                        <Select.Popover className="bg-white border rounded-xl shadow-xl mt-2 p-1.5 z-50">
+                                        <Select.Popover className="bg-white border border-amber-900/15 rounded-xl shadow-xl mt-2 p-1.5 z-50">
                                             <ListBox>
                                                 {categories.map((cat) => (
-                                                    <ListBox.Item key={cat} id={cat} textValue={cat} className="px-3 py-2.5 text-sm hover:bg-amber-50 rounded-lg cursor-pointer">
+                                                    <ListBox.Item
+                                                        key={cat}
+                                                        id={cat}
+                                                        textValue={cat}
+                                                        className="px-3 py-2.5 text-sm text-amber-950 hover:bg-amber-50 rounded-lg cursor-pointer transition-colors flex items-center justify-between outline-none"
+                                                    >
                                                         {cat}
+                                                        <ListBox.ItemIndicator className="text-amber-800" />
                                                     </ListBox.Item>
                                                 ))}
                                             </ListBox>

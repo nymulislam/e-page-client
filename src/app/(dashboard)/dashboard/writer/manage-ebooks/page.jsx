@@ -9,7 +9,7 @@ export default function ManageEbooks() {
     const { data: session } = authClient.useSession();
     const [ebooks, setEbooks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    
+
     // Modal States
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingEbookId, setEditingEbookId] = useState(null);
@@ -29,9 +29,8 @@ export default function ManageEbooks() {
         }
     };
 
-    
+
     useEffect(() => {
-    
         const fetchEbooks = async () => {
             if (!session?.user?.email) return;
             try {
@@ -86,12 +85,70 @@ export default function ManageEbooks() {
     const handleEditSuccess = () => {
         setIsEditModalOpen(false);
         setEditingEbookId(null);
-        fetchEbooks(); 
+        fetchEbooks();
     };
 
+    // --- Skeleton Loading Section ---
     if (isLoading) {
-        return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-amber-900" size={40} /></div>;
+        return (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+                {/* Skeleton Header */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl border border-amber-900/10 shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-amber-900/10 rounded-xl animate-pulse"></div>
+                        <div>
+                            <div className="h-6 w-32 bg-amber-900/10 rounded animate-pulse mb-2"></div>
+                            <div className="h-4 w-48 bg-amber-900/5 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div className="h-11 w-40 bg-amber-900/10 rounded-xl animate-pulse"></div>
+                </div>
+
+                {/* Skeleton Table */}
+                <div className="bg-white rounded-2xl border border-amber-900/10 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-amber-50/50 border-b border-amber-900/10">
+                                    <th className="p-5"><div className="h-4 w-24 bg-amber-100 rounded animate-pulse"></div></th>
+                                    <th className="p-5"><div className="h-4 w-16 bg-amber-100 rounded animate-pulse"></div></th>
+                                    <th className="p-5"><div className="h-4 w-12 bg-amber-100 rounded animate-pulse"></div></th>
+                                    <th className="p-5"><div className="h-4 w-16 bg-amber-100 rounded animate-pulse"></div></th>
+                                    <th className="p-5"><div className="h-4 w-16 bg-amber-100 rounded animate-pulse ml-auto"></div></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-amber-900/5">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <tr key={i}>
+                                        <td className="p-5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-16 w-12 rounded-md bg-amber-100 animate-pulse shrink-0"></div>
+                                                <div>
+                                                    <div className="h-4 w-32 bg-amber-100 rounded animate-pulse mb-2"></div>
+                                                    <div className="h-3 w-24 bg-amber-100 rounded animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-5"><div className="h-4 w-20 bg-amber-100 rounded animate-pulse"></div></td>
+                                        <td className="p-5"><div className="h-4 w-12 bg-amber-100 rounded animate-pulse"></div></td>
+                                        <td className="p-5"><div className="h-6 w-20 bg-amber-100 rounded-full animate-pulse"></div></td>
+                                        <td className="p-5">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <div className="h-8 w-8 bg-amber-100 rounded-lg animate-pulse"></div>
+                                                <div className="h-8 w-8 bg-amber-100 rounded-lg animate-pulse"></div>
+                                                <div className="h-8 w-8 bg-amber-100 rounded-lg animate-pulse"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
     }
+    // --- End of Skeleton Loading Section ---
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
@@ -146,23 +203,23 @@ export default function ManageEbooks() {
                                         <td className="p-5 text-amber-900/80 font-medium">{book.genre}</td>
                                         <td className="p-5 font-bold text-amber-900">${book.price.toFixed(2)}</td>
                                         <td className="p-5">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${book.isSold ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                                                {book.isSold ? <Eye size={14} /> : <EyeOff size={14} />}
-                                                {book.isSold ? 'Published' : 'Draft'}
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${book.isSold ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                                                {book.isSold ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                {book.isSold ? 'Unpublish' : 'Published'}
                                             </span>
                                         </td>
                                         <td className="p-5">
                                             <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => togglePublishStatus(book._id, book.isSold)} className="p-2 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors" title={book.isSold ? "Unpublish" : "Publish"}>
-                                                    {book.isSold ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                <button onClick={() => togglePublishStatus(book._id, book.isSold)} className="p-2 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors" title={book.isSold ? "Publish" : "Unpublish"}>
+                                                    {book.isSold ? <Eye size={18} /> : <EyeOff size={18} />}
                                                 </button>
-                                                
+
                                                 {/* Edit Button - Opens Modal */}
-                                                <button 
+                                                <button
                                                     onClick={() => {
                                                         setEditingEbookId(book._id);
                                                         setIsEditModalOpen(true);
-                                                    }} 
+                                                    }}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                 >
                                                     <Edit size={18} />
@@ -186,11 +243,11 @@ export default function ManageEbooks() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
                     <div className="bg-[#FDFBF7] rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200 border border-amber-900/10">
                         {/* Close Button */}
-                        <button 
+                        <button
                             onClick={() => {
                                 setIsEditModalOpen(false);
                                 setEditingEbookId(null);
-                            }} 
+                            }}
                             className="absolute top-6 right-6 p-2 bg-white text-gray-500 rounded-full shadow-sm hover:bg-gray-100 transition-colors z-10 border border-gray-200"
                         >
                             <X size={20} />
@@ -198,9 +255,9 @@ export default function ManageEbooks() {
 
                         <div className="p-6 md:p-8">
                             {/* AddEbook */}
-                            <AddEBook 
-                                ebookId={editingEbookId} 
-                                onSuccess={handleEditSuccess} 
+                            <AddEBook
+                                ebookId={editingEbookId}
+                                onSuccess={handleEditSuccess}
                             />
                         </div>
                     </div>

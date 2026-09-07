@@ -115,17 +115,17 @@ export default function ManageUsers() {
                 [...Array(5)].map((_, index) => (
                   <tr key={index} className="animate-pulse">
                     <td className="p-4">
-                      <div className="h-4 bg-amber-900/10 rounded w-3/4"></div>
+                      <div className="h-4 bg-amber-100 rounded w-3/4"></div>
                     </td>
                     <td className="p-4">
-                      <div className="h-4 bg-amber-900/10 rounded w-1/2"></div>
+                      <div className="h-4 bg-amber-100 rounded w-1/2"></div>
                     </td>
                     <td className="p-4">
-                      <div className="h-6 bg-amber-900/10 rounded-md w-20"></div>
+                      <div className="h-6 bg-amber-100 rounded-md w-20"></div>
                     </td>
                     <td className="p-4 flex items-center justify-end gap-3">
-                      <div className="h-9 bg-amber-900/10 rounded-lg w-36"></div>
-                      <div className="h-9 bg-amber-900/10 rounded-lg w-9"></div>
+                      <div className="h-9 bg-amber-100 rounded-lg w-36"></div>
+                      <div className="h-9 bg-amber-100 rounded-lg w-9"></div>
                     </td>
                   </tr>
                 ))
