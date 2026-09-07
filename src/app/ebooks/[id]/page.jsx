@@ -18,7 +18,7 @@ export default function EbookDetailsPage() {
     const [ebook, setEbook] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isBookmarked, setIsBookmarked] = useState(false);
-    const [isPurchasing, setIsPurchasing] = useState(false); // ✅ নতুন state
+    const [isPurchasing, setIsPurchasing] = useState(false);
     const { data: session, isPending } = authClient.useSession();
 
     const currentUser = session?.user;
@@ -111,7 +111,6 @@ export default function EbookDetailsPage() {
             return;
         }
 
-        // ✅ লোডিং শুরু
         setIsPurchasing(true);
 
         try {
@@ -131,14 +130,14 @@ export default function EbookDetailsPage() {
                 window.location.href = data.url;
             } else {
                 toast.error(data.error || 'Payment failed. Try again.');
-                setIsPurchasing(false); // ✅ error হলে লোডিং বন্ধ
+                setIsPurchasing(false); 
             }
         } catch (error) {
             console.error('Purchase error:', error);
             toast.error('Something went wrong. Please try again.');
-            setIsPurchasing(false); // ✅ error হলে লোডিং বন্ধ
+            setIsPurchasing(false);
         }
-        // সফল হলে লোডিং বন্ধ করার দরকার নেই কারণ পেজ রিলোড হবে
+        
     };
 
     const formatDate = (dateString) => {
