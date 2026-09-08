@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Search, Trash2, CheckCircle2, XCircle, BookX } from "lucide-react";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -8,10 +10,9 @@ export default function ManageEbooks() {
     const [ebooks, setEbooks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    
-    // পেজিনেশনের জন্য স্টেট
+
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8; // প্রতি পেজে কয়টি বই দেখাবে
+    const itemsPerPage = 8;
 
     useEffect(() => {
         const fetchAllEbooks = async () => {
@@ -23,6 +24,7 @@ export default function ManageEbooks() {
                 setEbooks(data);
             } catch (error) {
                 console.error("Error fetching all ebooks:", error);
+                toast.error("Failed to load ebooks!");
             } finally {
                 setIsLoading(false);
             }
@@ -49,38 +51,51 @@ export default function ManageEbooks() {
                         return bookId === id ? { ...book, isSold: newIsSold } : book;
                     })
                 );
+                toast.success(newIsSold ? "Ebook unpublished successfully!" : "Ebook published successfully!");
             } else {
-                alert("Failed to update status!");
+                toast.error("Failed to update status!");
             }
         } catch (error) {
             console.error("Error updating ebook status:", error);
-            alert("Something went wrong while updating status.");
+            toast.error("Something went wrong while updating status.");
         }
     };
 
     const handleDelete = async (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this ebook?");
-        if (!confirmDelete) return;
+        // SweetAlert2 Confirmation Modal
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#b45309", // theme amber color
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+        });
 
-        try {
-            const res = await fetch(`${apiURL}/ebooks/${id}`, {
-                method: "DELETE",
-            });
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${apiURL}/ebooks/${id}`, {
+                    method: "DELETE",
+                });
 
-            if (res.ok) {
-                setEbooks((prevEbooks) =>
-                    prevEbooks.filter((book) => (book._id || book.id) !== id)
-                );
-            } else {
-                alert("Failed to delete the ebook!");
+                if (res.ok) {
+                    setEbooks((prevEbooks) =>
+                        prevEbooks.filter((book) => (book._id || book.id) !== id)
+                    );
+                    toast.success("Ebook deleted successfully!");
+                } else {
+                    toast.error("Failed to delete the ebook!");
+                }
+            } catch (error) {
+                console.error("Error deleting ebook:", error);
+                toast.error("Something went wrong while deleting.");
             }
-        } catch (error) {
-            console.error("Error deleting ebook:", error);
-            alert("Something went wrong while deleting.");
         }
     };
 
-    //  search filtering
+    // search filtering
     const filteredEbooks = ebooks.filter((book) => {
         const titleMatch = book.title?.toLowerCase().includes(searchQuery.toLowerCase());
         const writerMatch = book.writer?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -136,21 +151,12 @@ export default function ManageEbooks() {
                         </thead>
                         <tbody className="divide-y divide-amber-900/5">
                             {isLoading ? (
-                                // Skeleton Loading Rows
                                 [...Array(5)].map((_, index) => (
                                     <tr key={index} className="animate-pulse">
-                                        <td className="p-4">
-                                            <div className="h-4 bg-amber-100 rounded w-3/4"></div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="h-4 bg-amber-100 rounded w-1/2"></div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="h-4 bg-amber-100 rounded w-1/4"></div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="h-6 bg-amber-100 rounded-md w-24"></div>
-                                        </td>
+                                        <td className="p-4"><div className="h-4 bg-amber-100 rounded w-3/4"></div></td>
+                                        <td className="p-4"><div className="h-4 bg-amber-100 rounded w-1/2"></div></td>
+                                        <td className="p-4"><div className="h-4 bg-amber-100 rounded w-1/4"></div></td>
+                                        <td className="p-4"><div className="h-6 bg-amber-100 rounded-md w-24"></div></td>
                                         <td className="p-4 flex items-center justify-end gap-2">
                                             <div className="h-8 bg-amber-100 rounded w-20"></div>
                                             <div className="h-8 bg-amber-100 rounded w-8"></div>
@@ -186,11 +192,10 @@ export default function ManageEbooks() {
                                             <td className="p-4 flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleToggleStatus(bookId, book.isSold)}
-                                                    className={`text-xs px-3 py-1.5 border rounded-md transition-colors font-medium w-24 text-center ${
-                                                        isPublished
-                                                            ? "border-amber-900/20 text-amber-900 hover:bg-amber-50"
-                                                            : "border-emerald-600 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                                                    }`}
+                                                    className={`text-xs px-3 py-1.5 border rounded-md transition-colors font-medium w-24 text-center ${isPublished
+                                                        ? "border-amber-900/20 text-amber-900 hover:bg-amber-50"
+                                                        : "border-emerald-600 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                                        }`}
                                                 >
                                                     {isPublished ? "Unpublish" : "Publish"}
                                                 </button>
@@ -246,11 +251,10 @@ export default function ManageEbooks() {
                                     <button
                                         key={pageNum}
                                         onClick={() => setCurrentPage(pageNum)}
-                                        className={`px-3 py-1.5 text-xs font-medium border rounded-md transition-colors ${
-                                            currentPage === pageNum
-                                                ? "bg-amber-800 text-white border-amber-800"
-                                                : "bg-white text-amber-900 border-amber-900/20 hover:bg-amber-50"
-                                        }`}
+                                        className={`px-3 py-1.5 text-xs font-medium border rounded-md transition-colors ${currentPage === pageNum
+                                            ? "bg-amber-800 text-white border-amber-800"
+                                            : "bg-white text-amber-900 border-amber-900/20 hover:bg-amber-50"
+                                            }`}
                                     >
                                         {pageNum}
                                     </button>

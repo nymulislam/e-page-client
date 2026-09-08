@@ -3,6 +3,8 @@ import { useState, useEffect, startTransition } from "react";
 import { Trash2, BookX } from "lucide-react";
 import Link from "next/link";
 import { authClient } from "@/app/lib/auth-client";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 export default function WishlistPage() {
     const [wishlistItems, setWishlistItems] = useState([]);
@@ -31,6 +33,7 @@ export default function WishlistPage() {
                 })
                 .catch((error) => {
                     console.error("Failed to fetch wishlist:", error);
+                    toast.error("Failed to load wishlist items!");
                     setIsLoading(false);
                 });
         });
@@ -40,20 +43,36 @@ export default function WishlistPage() {
         e.stopPropagation();
         e.preventDefault();
 
-        try {
-            const res = await fetch(`${apiURL}/wishlist/${currentUser.email}/${ebookId}`, {
-                method: 'DELETE',
-            });
+        // SweetAlert2 Confirmation
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to remove this book from your wishlist?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#b45309", // theme amber color
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Yes, remove it!",
+            cancelButtonText: "Cancel"
+        });
 
-            const data = await res.json();
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${apiURL}/wishlist/${currentUser.email}/${ebookId}`, {
+                    method: 'DELETE',
+                });
 
-            if (data.deletedCount > 0) {
-                setWishlistItems((prev) => prev.filter((item) => item.ebookId !== ebookId));
-            } else {
-                console.warn("No item deleted, maybe already removed");
+                const data = await res.json();
+
+                if (data.deletedCount > 0) {
+                    setWishlistItems((prev) => prev.filter((item) => item.ebookId !== ebookId));
+                    toast.success("Removed from wishlist!");
+                } else {
+                    toast.error("Item could not be removed or already deleted.");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                toast.error("Something went wrong while removing.");
             }
-        } catch (error) {
-            console.error("Delete failed:", error);
         }
     };
 

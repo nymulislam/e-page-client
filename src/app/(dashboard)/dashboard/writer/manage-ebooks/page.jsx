@@ -4,6 +4,8 @@ import { Edit, Trash2, Plus, Eye, EyeOff, BookOpen, Loader2, X } from "lucide-re
 import Link from "next/link";
 import { authClient } from "@/app/lib/auth-client";
 import AddEBook from "../add-ebook/page";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 export default function ManageEbooks() {
     const { data: session } = authClient.useSession();
@@ -24,6 +26,7 @@ export default function ManageEbooks() {
             setEbooks(data);
         } catch (error) {
             console.error("Failed to fetch ebooks", error);
+            toast.error("Failed to load ebooks!");
         } finally {
             setIsLoading(false);
         }
@@ -39,6 +42,7 @@ export default function ManageEbooks() {
                 setEbooks(data);
             } catch (error) {
                 console.error("Failed to fetch ebooks", error);
+                toast.error("Failed to load ebooks!");
             } finally {
                 setIsLoading(false);
             }
@@ -48,6 +52,7 @@ export default function ManageEbooks() {
     }, [session?.user?.email, apiURL]);
 
     const togglePublishStatus = async (id, currentStatus) => {
+        const loadingToast = toast.loading("Updating status...");
         try {
             const newStatus = !currentStatus;
             const res = await fetch(`${apiURL}/ebooks/${id}`, {
@@ -59,33 +64,51 @@ export default function ManageEbooks() {
                 setEbooks(prev => prev.map(book =>
                     book._id === id ? { ...book, isSold: newStatus } : book
                 ));
+                toast.success(`Ebook ${newStatus ? 'unpublished' : 'published'} successfully!`, { id: loadingToast });
+            } else {
+                toast.error("Failed to update status.", { id: loadingToast });
             }
         } catch (error) {
             console.error("Failed to update status", error);
+            toast.error("Something went wrong!", { id: loadingToast });
         }
     };
 
     const handleDelete = async (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this ebook?");
-        if (!confirmDelete) return;
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#b45309",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Yes, delete it!"
+        });
 
-        try {
-            const res = await fetch(`${apiURL}/ebooks/${id}`, {
-                method: "DELETE",
-            });
-            if (res.ok) {
-                setEbooks(prev => prev.filter(book => book._id !== id));
+        if (result.isConfirmed) {
+            const loadingToast = toast.loading("Deleting ebook...");
+            try {
+                const res = await fetch(`${apiURL}/ebooks/${id}`, {
+                    method: "DELETE",
+                });
+                if (res.ok) {
+                    setEbooks(prev => prev.filter(book => book._id !== id));
+                    toast.success("Ebook deleted successfully!", { id: loadingToast });
+                } else {
+                    toast.error("Failed to delete ebook.", { id: loadingToast });
+                }
+            } catch (error) {
+                console.error("Failed to delete", error);
+                toast.error("An error occurred while deleting.", { id: loadingToast });
             }
-        } catch (error) {
-            console.error("Failed to delete", error);
         }
     };
-
 
     const handleEditSuccess = () => {
         setIsEditModalOpen(false);
         setEditingEbookId(null);
         fetchEbooks();
+        toast.success("Ebook updated successfully!");
     };
 
     // --- Skeleton Loading Section ---

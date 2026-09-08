@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, startTransition } from "react";
-import { CheckCircle2, Loader2, CreditCard, ShoppingBag, DollarSign, Calendar } from "lucide-react";
+import { CheckCircle2, CreditCard, ShoppingBag, DollarSign, Calendar } from "lucide-react";
 import { authClient } from "@/app/lib/auth-client";
 import Link from "next/link";
 
@@ -48,11 +48,50 @@ export default function PurchaseHistory() {
     // মোট খরচের হিসাব
     const totalSpent = purchases.reduce((acc, curr) => acc + (curr.amount || 0), 0);
 
+    // Skeleton Loading UI
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center py-24 space-y-3">
-                <Loader2 className="animate-spin text-amber-900" size={44} />
-                <p className="text-sm text-amber-900/60 font-medium">Loading transaction records...</p>
+            <div className="space-y-8 animate-pulse">
+                {/* Header Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-7 bg-amber-100/70 rounded-md w-48"></div>
+                    <div className="h-4 bg-amber-100/50 rounded-md w-80"></div>
+                </div>
+
+                {/* Cards Skeleton */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-white p-5 rounded-2xl border border-amber-900/10 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 bg-amber-100/70 rounded-xl shrink-0"></div>
+                            <div className="space-y-2 flex-1">
+                                <div className="h-3 bg-amber-100/60 rounded w-2/3"></div>
+                                <div className="h-6 bg-amber-100/80 rounded w-1/3"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Table Skeleton */}
+                <div className="bg-white rounded-2xl border border-amber-900/10 shadow-sm overflow-hidden p-6 space-y-4">
+                    <div className="h-5 bg-amber-100/70 rounded w-40 mb-6"></div>
+                    <div className="space-y-4">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="flex items-center justify-between gap-4 py-3 border-b border-amber-900/5 last:border-0">
+                                <div className="flex items-center gap-3 flex-1">
+                                    <div className="w-10 h-12 bg-amber-100/70 rounded-md shrink-0"></div>
+                                    <div className="space-y-2 flex-1">
+                                        <div className="h-4 bg-amber-100/70 rounded w-3/4"></div>
+                                        <div className="h-3 bg-amber-100/50 rounded w-1/2"></div>
+                                    </div>
+                                </div>
+                                <div className="h-4 bg-amber-100/60 rounded w-24 hidden sm:block"></div>
+                                <div className="h-4 bg-amber-100/70 rounded w-16"></div>
+                                <div className="h-4 bg-amber-100/60 rounded w-20 hidden md:block"></div>
+                                <div className="h-6 bg-amber-100/60 rounded-full w-20 shrink-0"></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }

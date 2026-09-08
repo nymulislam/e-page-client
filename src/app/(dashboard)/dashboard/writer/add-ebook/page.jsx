@@ -1,14 +1,15 @@
-"use client";
+"use client"
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PlusCircle, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Select, ListBox, Label, TextField, InputGroup, TextArea, Surface } from "@heroui/react";
 import { authClient } from "@/app/lib/auth-client";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const categories = ["Technology", "Literature", "History", "Science", "Poetry", "Islamic", "Mystery"];
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
-// onSuccess 
 export default function AddEBook({ ebookId, onSuccess }) {
     const router = useRouter();
     const { data: session } = authClient.useSession();
@@ -25,9 +26,13 @@ export default function AddEBook({ ebookId, onSuccess }) {
             fetch(`${apiURL}/ebooks/${ebookId}`)
                 .then(res => res.json())
                 .then(data => {
-                    setFormData({ title: data.title, price: data.price, description: data.description });
-                    setSelectedGenre(data.genre);
-                    setPreviewImage(data.cover);
+                    setFormData({ title: data.title || "", price: data.price || "", description: data.description || "" });
+                    setSelectedGenre(data.genre || "");
+                    setPreviewImage(data.cover || null);
+                })
+                .catch((err) => {
+                    console.error("Failed to fetch ebook data:", err);
+                    toast.error("Failed to load ebook data.");
                 });
         }
     }, [ebookId, apiURL]);
@@ -42,6 +47,12 @@ export default function AddEBook({ ebookId, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!selectedGenre) {
+            toast.error("Please select a genre/category!");
+            return;
+        }
+
         setIsLoading(true);
 
         let coverImageUrl = previewImage;
@@ -56,9 +67,14 @@ export default function AddEBook({ ebookId, onSuccess }) {
                 const imgJson = await imgRes.json();
                 if (imgJson.success) {
                     coverImageUrl = imgJson.data.display_url;
+                } else {
+                    toast.error("Image upload failed!");
+                    setIsLoading(false);
+                    return;
                 }
             } catch (error) {
                 console.error("Image Upload Failed", error);
+                toast.error("Image upload failed! Check connection.");
                 setIsLoading(false);
                 return;
             }
@@ -74,7 +90,6 @@ export default function AddEBook({ ebookId, onSuccess }) {
             writerEmail: session?.user?.email,
         };
 
-        //
         if (!ebookId) {
             ebookData.isSold = false;
         }
@@ -93,14 +108,26 @@ export default function AddEBook({ ebookId, onSuccess }) {
             });
 
             if (response.ok) {
+                await Swal.fire({
+                    title: ebookId ? "Updated!" : "Published!",
+                    text: ebookId ? "Your ebook has been updated successfully." : "Your new ebook is live now.",
+                    icon: "success",
+                    confirmButtonColor: "#78350f",
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+
                 if (onSuccess) {
                     onSuccess();
                 } else {
                     router.push("/dashboard/writer/manage-ebooks");
                 }
+            } else {
+                toast.error("Failed to save ebook. Please try again.");
             }
         } catch (error) {
             console.error("Failed to save ebook", error);
+            toast.error("Something went wrong while saving.");
         } finally {
             setIsLoading(false);
         }
@@ -125,7 +152,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
                                 </InputGroup>
                             </TextField>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                                 <TextField className="w-full" name="price" value={formData.price} onChange={(val) => setFormData({ ...formData, price: val })} isRequired>
                                     <Label className="text-sm font-semibold text-amber-950 block mb-2">Price ($)</Label>
                                     <InputGroup className="w-full focus-within:ring-4 focus-within:ring-amber-600/10">
@@ -135,10 +162,10 @@ export default function AddEBook({ ebookId, onSuccess }) {
                                 </TextField>
 
                                 <div className="space-y-2">
-                                    <Label className="text-sm font-semibold text-amber-950 block mb-2">Genre / Category</Label>
+                                    <Label className="text-sm font-semibold text-amber-950 block ">Genre / Category</Label>
 
                                     <Select
-                                        className="w-full"
+                                        className="w-full bg-transparent p-0 border-none min-h-0"
                                         placeholder="Select a genre"
                                         value={selectedGenre || ""}
                                         onChange={(value) => setSelectedGenre(value || "")}

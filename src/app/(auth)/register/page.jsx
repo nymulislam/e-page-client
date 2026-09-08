@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { User, AtSign, Shield, Eye, EyeOff, BookOpen, PenTool } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { authClient } from "@/app/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -24,7 +25,9 @@ export default function RegisterPage() {
         setErrorMsg("");
 
         if (password !== confirmPassword) {
-            setErrorMsg("Passwords do not match!");
+            const msg = "Passwords do not match!";
+            setErrorMsg(msg);
+            toast.error(msg);
             return;
         }
 
@@ -35,36 +38,47 @@ export default function RegisterPage() {
                 email,
                 password,
                 name,
-                requestedRole: selectedRole, // "reader" or "writer"
+                requestedRole: selectedRole,
                 plan: "free",
                 callbackURL: "/",
             });
 
             if (error) {
-                setErrorMsg(error.message || "Registration failed. Please try again.");
+                const msg = error.message || "Registration failed. Please try again.";
+                setErrorMsg(msg);
+                toast.error(msg);
                 setIsLoading(false);
                 return;
             }
 
-            router.push("/");
+            toast.success("Account created successfully! Please login.");
+            router.push("/login");
         } catch (err) {
-            setErrorMsg("An unexpected error occurred.");
+            const msg = err?.message || "An unexpected error occurred.";
+            setErrorMsg(msg);
+            toast.error(msg);
             setIsLoading(false);
         }
     };
 
     const handleGoogleSignUp = async () => {
-        await authClient.signIn.social({
-            provider: "google",
-            callbackURL: "/",
-        });
+        try {
+            await authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/dashboard/reader",
+            });
+            toast.success("Google sign-in successful!");
+        } catch (err) {
+            const msg = "Google sign-in failed. Try again.";
+            toast.error(msg);
+            setErrorMsg(msg);
+        }
     };
 
     return (
         <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4 py-12">
             <div className="w-full max-w-lg bg-white rounded-3xl p-8 md:p-10 border border-amber-100 shadow-xl shadow-amber-900/5 relative overflow-hidden">
 
-                {/* Decorative Glow */}
                 <div className="absolute top-0 right-0 w-40 h-40 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="text-center mb-6 relative z-10">
@@ -80,45 +94,52 @@ export default function RegisterPage() {
 
                 <form onSubmit={handleRegister} className="space-y-4 relative z-10">
 
-                    {/* Full Name */}
                     <div className="space-y-1.5">
                         <label className="text-sm font-semibold text-amber-950/80">Full Name <span className="text-red-500">*</span></label>
                         <div className="relative flex items-center">
                             <User className="absolute left-4 text-amber-900/40" size={18} />
                             <input
-                                type="text" required placeholder="John Doe"
-                                value={name} onChange={(e) => setName(e.target.value)}
+                                type="text"
+                                required
+                                placeholder="John Doe"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="w-full bg-white border border-amber-200 rounded-xl pl-11 pr-4 py-3 text-amber-950 placeholder-amber-900/30 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-all shadow-sm"
                             />
                         </div>
                     </div>
 
-                    {/* Email */}
                     <div className="space-y-1.5">
                         <label className="text-sm font-semibold text-amber-950/80">Email Address <span className="text-red-500">*</span></label>
                         <div className="relative flex items-center">
                             <AtSign className="absolute left-4 text-amber-900/40" size={18} />
                             <input
-                                type="email" required placeholder="you@example.com"
-                                value={email} onChange={(e) => setEmail(e.target.value)}
+                                type="email"
+                                required
+                                placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full bg-white border border-amber-200 rounded-xl pl-11 pr-4 py-3 text-amber-950 placeholder-amber-900/30 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-all shadow-sm"
                             />
                         </div>
                     </div>
 
-                    {/* Password Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-sm font-semibold text-amber-950/80">Password <span className="text-red-500">*</span></label>
                             <div className="relative flex items-center">
                                 <Shield className="absolute left-4 text-amber-900/40" size={16} />
                                 <input
-                                    type={showPassword ? "text" : "password"} required placeholder="••••••••"
-                                    value={password} onChange={(e) => setPassword(e.target.value)}
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="w-full bg-white border border-amber-200 rounded-xl pl-10 pr-10 py-3 text-amber-950 placeholder-amber-900/30 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-all shadow-sm"
                                 />
                                 <button
-                                    type="button" onClick={() => setShowPassword(!showPassword)}
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 text-amber-900/40 hover:text-amber-700"
                                 >
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -131,12 +152,16 @@ export default function RegisterPage() {
                             <div className="relative flex items-center">
                                 <Shield className="absolute left-4 text-amber-900/40" size={16} />
                                 <input
-                                    type={showConfirmPassword ? "text" : "password"} required placeholder="••••••••"
-                                    value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    placeholder="••••••••"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                     className="w-full bg-white border border-amber-200 rounded-xl pl-10 pr-10 py-3 text-amber-950 placeholder-amber-900/30 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 transition-all shadow-sm"
                                 />
                                 <button
-                                    type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                     className="absolute right-3 text-amber-900/40 hover:text-amber-700"
                                 >
                                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -145,7 +170,6 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Role Selection */}
                     <div className="pt-2">
                         <label className="text-sm font-semibold text-amber-950/80 block mb-2">Choose your journey:</label>
                         <div className="grid grid-cols-2 gap-4">
@@ -166,9 +190,9 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Submit Button */}
                     <button
-                        type="submit" disabled={isLoading}
+                        type="submit"
+                        disabled={isLoading}
                         className="w-full bg-amber-950 hover:bg-amber-900 text-amber-50 font-medium py-3.5 rounded-xl transition-all shadow-lg hover:shadow-amber-900/20 mt-4 cursor-pointer"
                     >
                         {isLoading ? "Creating account..." : "Create Account"}
@@ -181,7 +205,6 @@ export default function RegisterPage() {
                     <div className="h-px bg-amber-200 flex-1"></div>
                 </div>
 
-                {/* Google OAuth Register */}
                 <button
                     onClick={handleGoogleSignUp}
                     className="w-full bg-white border border-amber-200 hover:bg-amber-50 text-amber-950 font-medium py-3.5 rounded-xl transition-all flex items-center justify-center gap-3 shadow-sm cursor-pointer"

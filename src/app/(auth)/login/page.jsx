@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AtSign, Shield, Eye, EyeOff, User, PenTool } from "lucide-react";
 import { authClient } from "@/app/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -13,6 +14,10 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const router = useRouter();
+
+    const searchParams = useSearchParams();
+    const hasRedirect = searchParams.has("redirect");
+    const redirectTo = searchParams.get("redirect") || "/dashboard/reader";
 
     // Demo Credentials
     const demoAccounts = {
@@ -32,21 +37,33 @@ export default function LoginPage() {
             });
 
             if (error) {
-                setErrorMsg(error.message || "Invalid credentials. Ensure demo accounts exist in the database.");
+                const msg = error.message || "Invalid credentials. Please try again.";
+                setErrorMsg(msg);
+                toast.error(msg);
                 setIsLoading(false);
                 return;
             }
 
-            const session = await authClient.getSession();
-            const userRole = session?.data?.user?.role
-                || "reader";
+            toast.success("Welcome back!");
 
-            if (userRole === "admin") router.push("/dashboard/admin");
-            else if (userRole === "writer") router.push("/dashboard/writer");
-            else router.push("/dashboard/reader");
+            if (hasRedirect) {
+                router.push(redirectTo);
+            } else {
+                const session = await authClient.getSession();
+                const userRole = session?.data?.user?.role || "reader";
 
+                if (userRole === "admin") {
+                    router.push("/dashboard/admin");
+                } else if (userRole === "writer") {
+                    router.push("/dashboard/writer");
+                } else {
+                    router.push("/dashboard/reader");
+                }
+            }
         } catch (err) {
-            setErrorMsg("An unexpected error occurred during login.");
+            const msg = err?.message || "An unexpected error occurred during login.";
+            setErrorMsg(msg);
+            toast.error(msg);
             setIsLoading(false);
         }
     };
@@ -79,7 +96,7 @@ export default function LoginPage() {
                     </div>
                 )}
 
-                {/* --- One-Click Demo Login Section --- */}
+                {/* Demo Login */}
                 <div className="mb-6 space-y-2">
                     <p className="text-xs font-semibold text-amber-900/50 uppercase tracking-wider text-center mb-3">
                         Portfolio Demo Login
@@ -118,7 +135,6 @@ export default function LoginPage() {
                     <div className="h-px bg-amber-200 flex-1"></div>
                 </div>
 
-                {/* --- Standard Login Form --- */}
                 <form onSubmit={handleEmailLogin} className="space-y-4">
                     <div className="relative">
                         <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900/40" size={18} />
@@ -151,7 +167,8 @@ export default function LoginPage() {
                     </div>
 
                     <button
-                        type="submit" disabled={isLoading}
+                        type="submit"
+                        disabled={isLoading}
                         className="w-full bg-amber-950 hover:bg-amber-900 text-amber-50 font-medium py-3.5 rounded-xl transition-all shadow-lg hover:shadow-amber-900/20 flex justify-center items-center gap-2 mt-2 cursor-pointer"
                     >
                         {isLoading ? <span className="animate-pulse">Signing in...</span> : "Sign In"}
