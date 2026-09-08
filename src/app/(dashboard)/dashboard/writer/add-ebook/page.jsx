@@ -224,7 +224,7 @@ export default function AddEBook({ ebookId, onSuccess }) {
                     </TextField>
 
                     <div className="pt-4 flex justify-end border-t border-amber-900/5">
-                        <button type="submit" disabled={isLoading} className="w-full md:w-auto px-10 flex items-center justify-center gap-2 py-3.5 bg-amber-900 text-white rounded-xl text-sm font-semibold hover:bg-amber-950 transition-all disabled:opacity-70">
+                        <button type="submit" disabled={isLoading} className="w-full md:w-auto px-10 flex items-center justify-center gap-2 py-3.5 bg-amber-900 text-white rounded-xl text-sm font-semibold hover:bg-amber-950 transition-all disabled:opacity-70 cursor-pointer">
                             {isLoading ? <Loader2 className="animate-spin" size={18} /> : <PlusCircle size={18} />}
                             {isLoading ? "Saving..." : ebookId ? "Update Ebook" : "Publish Ebook"}
                         </button>

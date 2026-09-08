@@ -227,7 +227,7 @@ export default function ManageUsers() {
 
                         <button
                           onClick={() => handleDeleteUser(user.id)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                           title="Delete User"
                         >
                           <Trash2 size={18} />

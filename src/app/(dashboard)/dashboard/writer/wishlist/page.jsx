@@ -145,7 +145,7 @@ export default function WishlistPage() {
                                 {/* Delete button */}
                                 <button
                                     onClick={(e) => handleDelete(item.ebookId, e)}
-                                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-md rounded-full text-red-500 hover:bg-red-50 hover:text-red-700 shadow-sm transition-colors z-10"
+                                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-md rounded-full text-red-500 hover:bg-red-50 hover:text-red-700 shadow-sm transition-colors z-10 cursor-pointer"
                                     title="Remove from wishlist"
                                 >
                                     <Trash2 size={16} />

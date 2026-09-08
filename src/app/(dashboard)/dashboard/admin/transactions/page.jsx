@@ -72,7 +72,7 @@ export default function Transactions() {
                     <button
                         onClick={fetchTransactions}
                         disabled={loading}
-                        className="p-2.5 bg-amber-100/50 border border-amber-200 hover:bg-amber-100 text-amber-700 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="p-2.5 bg-amber-100/50 border border-amber-200 hover:bg-amber-100 text-amber-700 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
                         title="Refresh Data"
                     >
                         <RefreshCw size={18} className={loading ? "animate-spin text-amber-500" : ""} />

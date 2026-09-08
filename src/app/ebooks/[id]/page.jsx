@@ -298,7 +298,7 @@ export default function EbookDetailsPage() {
                                     <button
                                         onClick={handlePurchase}
                                         disabled={isPurchasing}
-                                        className={`w-full font-medium py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-xl ${isPurchasing
+                                        className={`w-full font-medium py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-xl cursor-pointer ${isPurchasing
                                             ? 'bg-amber-400 cursor-not-allowed'
                                             : 'bg-amber-950 hover:bg-amber-900 hover:shadow-amber-900/20'
                                             } text-amber-50`}

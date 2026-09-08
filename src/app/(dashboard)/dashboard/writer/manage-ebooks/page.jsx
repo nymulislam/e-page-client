@@ -233,7 +233,7 @@ export default function ManageEbooks() {
                                         </td>
                                         <td className="p-5">
                                             <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => togglePublishStatus(book._id, book.isSold)} className="p-2 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors" title={book.isSold ? "Publish" : "Unpublish"}>
+                                                <button onClick={() => togglePublishStatus(book._id, book.isSold)} className="p-2 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors cursor-pointer" title={book.isSold ? "Publish" : "Unpublish"}>
                                                     {book.isSold ? <Eye size={18} /> : <EyeOff size={18} />}
                                                 </button>
 
@@ -243,12 +243,12 @@ export default function ManageEbooks() {
                                                         setEditingEbookId(book._id);
                                                         setIsEditModalOpen(true);
                                                     }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                                                 >
                                                     <Edit size={18} />
                                                 </button>
 
-                                                <button onClick={() => handleDelete(book._id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                                <button onClick={() => handleDelete(book._id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
                                                     <Trash2 size={18} />
                                                 </button>
                                             </div>

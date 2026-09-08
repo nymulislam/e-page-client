@@ -68,7 +68,7 @@ export default function ManageEbooks() {
             text: "You won't be able to revert this!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#b45309", // theme amber color
+            confirmButtonColor: "#b45309",
             cancelButtonColor: "#6b7280",
             confirmButtonText: "Yes, delete it!",
             cancelButtonText: "Cancel"
@@ -192,7 +192,7 @@ export default function ManageEbooks() {
                                             <td className="p-4 flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleToggleStatus(bookId, book.isSold)}
-                                                    className={`text-xs px-3 py-1.5 border rounded-md transition-colors font-medium w-24 text-center ${isPublished
+                                                    className={`text-xs px-3 py-1.5 border rounded-md transition-colors font-medium w-24 text-center cursor-pointer ${isPublished
                                                         ? "border-amber-900/20 text-amber-900 hover:bg-amber-50"
                                                         : "border-emerald-600 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                                                         }`}
@@ -201,7 +201,7 @@ export default function ManageEbooks() {
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(bookId)}
-                                                    className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors border border-transparent hover:border-red-100"
+                                                    className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors border border-transparent hover:border-red-100 cursor-pointer"
                                                     title="Delete Ebook"
                                                 >
                                                     <Trash2 size={18} />
@@ -251,7 +251,7 @@ export default function ManageEbooks() {
                                     <button
                                         key={pageNum}
                                         onClick={() => setCurrentPage(pageNum)}
-                                        className={`px-3 py-1.5 text-xs font-medium border rounded-md transition-colors ${currentPage === pageNum
+                                        className={`px-3 py-1.5 text-xs font-medium border rounded-md transition-colors cursor-pointer ${currentPage === pageNum
                                             ? "bg-amber-800 text-white border-amber-800"
                                             : "bg-white text-amber-900 border-amber-900/20 hover:bg-amber-50"
                                             }`}

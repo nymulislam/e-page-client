@@ -166,7 +166,7 @@ function BrowseEbooksContent() {
                         <button
                             key={cat}
                             onClick={() => handleCategoryChange(cat)}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${selectedCategory === cat
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap cursor-pointer ${selectedCategory === cat
                                     ? "bg-amber-950 text-amber-50 shadow-md"
                                     : "bg-white border border-amber-200 text-amber-900/70 hover:bg-amber-50"
                                 }`}

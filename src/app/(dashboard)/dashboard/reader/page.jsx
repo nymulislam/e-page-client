@@ -63,7 +63,7 @@ export default function UserProfile() {
                         Manage your digital presence within the sanctuary. Keep your personal narrative up to date.
                     </p>
                 </div>
-                <button className="group flex items-center gap-2 px-5 py-2.5 bg-amber-950 text-amber-50 rounded-full text-sm font-medium hover:bg-amber-900 transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5">
+                <button className="group flex items-center gap-2 px-5 py-2.5 bg-amber-950 text-amber-50 rounded-full text-sm font-medium hover:bg-amber-900 transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer">
                     <Edit3 size={16} className="group-hover:rotate-12 transition-transform duration-300" />
                     Edit Profile
                 </button>
